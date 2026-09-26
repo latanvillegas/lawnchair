@@ -90,6 +90,8 @@ class ThemeProvider @Inject constructor(
 
     val colorScheme get() = when (val accentColor = this.accentColor) {
         is ColorOption.SystemAccent -> systemColorScheme
+        is ColorOption.PureBlack -> getColorScheme(android.graphics.Color.BLACK, colorStyle.style)
+        is ColorOption.PureWhite -> getColorScheme(android.graphics.Color.WHITE, colorStyle.style)
 
         is ColorOption.WallpaperPrimary -> {
             val wallpaperPrimary = wallpaperManager.wallpaperColors?.primaryColor
