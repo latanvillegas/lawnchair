@@ -26,6 +26,22 @@ sealed class ColorOption {
         override fun toString() = "system_accent"
     }
 
+    object PureBlack : ColorOption() {
+        override val isSupported = true
+        override val colorPreferenceEntry = ColorPreferenceEntry<ColorOption>(
+            this, { "Negro puro AMOLED/OLED" }, { Color.BLACK },
+        )
+        override fun toString() = "pure_black"
+    }
+
+    object PureWhite : ColorOption() {
+        override val isSupported = true
+        override val colorPreferenceEntry = ColorPreferenceEntry<ColorOption>(
+            this, { "Blanco puro" }, { Color.WHITE },
+        )
+        override fun toString() = "pure_white"
+    }
+
     object WallpaperPrimary : ColorOption() {
         override val isSupported = Utilities.ATLEAST_O_MR1
 
@@ -77,6 +93,8 @@ sealed class ColorOption {
 
         fun fromString(stringValue: String) = when (stringValue) {
             "system_accent" -> SystemAccent
+            "pure_black" -> PureBlack
+            "pure_white" -> PureWhite
             "wallpaper_primary" -> WallpaperPrimary
             "default" -> Default
             else -> instantiateCustomColor(stringValue)
