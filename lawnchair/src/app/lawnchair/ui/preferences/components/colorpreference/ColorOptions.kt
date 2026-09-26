@@ -18,7 +18,12 @@ val staticColors: List<ColorPreferenceEntry<ColorOption>> = sequenceOf(
 ).map(ColorOption::colorPreferenceEntry).toList()
 
 val dynamicColors: List<ColorPreferenceEntry<ColorOption>> =
-    sequenceOf(ColorOption.SystemAccent, ColorOption.WallpaperPrimary)
+    sequenceOf(
+        ColorOption.SystemAccent,
+        ColorOption.WallpaperPrimary,
+        ColorOption.PureBlack,
+        ColorOption.PureWhite,
+    )
         .filter(ColorOption::isSupported)
         .map(ColorOption::colorPreferenceEntry)
         .toList()
