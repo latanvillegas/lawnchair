@@ -202,8 +202,6 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
     private int mNavBarScrimHeight = 0;
     public SearchRecyclerView mSearchRecyclerView;
     protected SearchAdapterProvider<?> mMainAdapterProvider;
-    private View mBottomSheetHandleArea;
-    private View mBottomSheetHandle;
     private boolean mHasWorkApps;
     private boolean mHasPrivateApps;
     private float[] mBottomSheetCornerRadii;
@@ -313,8 +311,6 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         mAdditionalHeaderRows.clear();
         mAdditionalHeaderRows.addAll(getAdditionalHeaderRows());
         mBottomSheetBackground = findViewById(R.id.bottom_sheet_background);
-        mBottomSheetHandleArea = findViewById(R.id.bottom_sheet_handle_area);
-        mBottomSheetHandle = findViewById(R.id.bottom_sheet_handle);
         mSearchRecyclerView = findViewById(R.id.search_results_list_view);
         mFastScroller = findViewById(R.id.fast_scroller);
         mFastScroller.setPopupView(findViewById(R.id.fast_scroller_popup));
@@ -516,11 +512,6 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                 boolean canScrollUp = editText.canScrollVertically(-1);
                 return !canScrollUp;
             }
-            return true;
-        }
-        // If the MotionEvent is inside the handle area, and the container keeps on receiving touch
-        // input, container should move down.
-        if (dragLayer.isEventOverView(mBottomSheetHandleArea, ev)) {
             return true;
         }
         AllAppsRecyclerView rv = getActiveRecyclerView();
@@ -1106,11 +1097,6 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
         RelativeLayout.LayoutParams layoutParams = (LayoutParams) v.getLayoutParams();
         layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP);
         int topMargin = 0;
-        if (mActivityContext.getDeviceProfile().shouldShowAllAppsOnSheet()) {
-            // Clear the bottom-sheet drag handle when search is not reserving that space.
-            topMargin = getContext().getResources().getDimensionPixelSize(
-                    R.dimen.bottom_sheet_handle_area_height);
-        }
         if (includeTabsMargin) {
             topMargin += getContext().getResources().getDimensionPixelSize(
                     R.dimen.all_apps_header_pill_height);
