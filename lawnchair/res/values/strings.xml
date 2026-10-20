@@ -1081,4 +1081,6 @@
     <string name="amoled_wallpaper_choose">Choose wallpaper</string>
     <string name="amoled_appearance">Appearance</string>
     <string name="amoled_navigation_opacity">Navigation bar opacity</string>
+    <string name="amoled_reset_appearance">Reset appearance</string>
+    <string name="amoled_reset_appearance_confirm">Restore automatic theme, pure cyan accent, AMOLED wallpaper and 95% navigation bar opacity? Other launcher settings will not be changed.</string>
 </resources>
