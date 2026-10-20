@@ -89,6 +89,14 @@ sealed class ColorOption {
     }
 
     companion object {
+        // Fully saturated RGB presets; selected explicitly so Material You remains available.
+        val PureRed = CustomColor(0xFFFF0000)
+        val PureGreen = CustomColor(0xFF00FF00)
+        val PureBlue = CustomColor(0xFF0000FF)
+        val PureCyan = CustomColor(0xFF00FFFF)
+        val PureYellow = CustomColor(0xFFFFFF00)
+        val PureMagenta = CustomColor(0xFFFF00FF)
+
         val LawnchairBlue = CustomColor(0xFF007FFF)
 
         fun fromString(stringValue: String) = when (stringValue) {
