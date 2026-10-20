@@ -75,6 +75,7 @@ sealed class ColorOption {
                 }
             },
             { color },
+            { color },
         )
 
         constructor(color: Long) : this(color.toInt())
