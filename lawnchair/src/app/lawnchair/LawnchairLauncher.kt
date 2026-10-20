@@ -160,8 +160,10 @@ class LawnchairLauncher : QuickstepLauncher() {
     override fun onCreate(savedInstanceState: Bundle?) {
         layoutInflater.factory2 = LawnchairLayoutFactory(this)
         super.onCreate(savedInstanceState)
+        applyHomeWallpaperMode()
 
         prefs.launcherTheme.subscribeChanges(this, ::updateTheme)
+        prefs.homeWallpaperMode.subscribeChanges(this, ::applyHomeWallpaperMode)
         prefs.feedProvider.subscribeChanges(this, defaultOverlay::reconnect)
         preferenceManager2.enableFeed.get().distinctUntilChanged().onEach { enable ->
             defaultOverlay.setEnableFeed(enable)
@@ -286,6 +288,19 @@ class LawnchairLauncher : QuickstepLauncher() {
             if (LawnchairApp.isRecentsEnabled) Stream.of(LawnchairShortcut.PAUSE_APPS) else Stream.empty(),
         ),
     )
+
+    private fun applyHomeWallpaperMode() {
+        val showWallpaper = prefs.homeWallpaperMode.get() != "amoled"
+        if (showWallpaper) {
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+            window.setBackgroundDrawableResource(android.R.color.transparent)
+        } else {
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+            val dark = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+            window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(if (dark) android.graphics.Color.BLACK else android.graphics.Color.WHITE))
+        }
+    }
 
     fun updateTheme() {
         if (themeProvider.colorScheme != colorScheme) {
