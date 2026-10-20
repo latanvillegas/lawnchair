@@ -104,5 +104,16 @@
     <color name="surface_variant_dark">#FF000000</color>
     <color name="surface_variant_light">#FFFFFFFF</color>
 
+    <!-- Pure RGB AMOLED accent candidates. Keep distinct from system dynamic palettes
+         until each UI consumer and its foreground contrast have been audited. -->
+    <color name="amoled_pure_black">#FF000000</color>
+    <color name="amoled_pure_white">#FFFFFFFF</color>
+    <color name="amoled_pure_red">#FFFF0000</color>
+    <color name="amoled_pure_green">#FF00FF00</color>
+    <color name="amoled_pure_blue">#FF0000FF</color>
+    <color name="amoled_pure_cyan">#FF00FFFF</color>
+    <color name="amoled_pure_yellow">#FFFFFF00</color>
+    <color name="amoled_pure_magenta">#FFFF00FF</color>
+
     <color name="accent_primary_device_default">@color/system_accent1_100</color>
 </resources>
