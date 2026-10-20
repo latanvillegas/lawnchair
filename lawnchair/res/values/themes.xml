@@ -8,7 +8,7 @@
     </style>
 
     <style name="Base.Theme.Lawnchair" parent="Base.Theme.MaterialThemeBuilder">
-        <item name="android:colorBackground">@color/white_50</item>
+        <item name="android:colorBackground">@color/amoled_pure_white</item>
     </style>
 
     <style name="Base.Theme.MaterialThemeBuilder" parent="Theme.AppCompat.DayNight.NoActionBar">
