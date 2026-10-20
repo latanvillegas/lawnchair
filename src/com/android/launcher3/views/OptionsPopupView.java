@@ -157,7 +157,9 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
                 PreferenceManager.getInstance(getContext()).getHomePopupOpacity().get()));
         final int backgroundColor = androidx.core.graphics.ColorUtils.setAlphaComponent(
                 mColors[0], Math.round(opacity * 255f / 100f));
-        assignMarginsAndBackgrounds(viewGroup, backgroundColor);
+        // ArrowPopup treats Color.TRANSPARENT (zero) as a request for default colors.
+        // Preserve a zero-alpha custom color without triggering that sentinel.
+        assignMarginsAndBackgrounds(viewGroup, opacity == 0 ? 0x00000001 : backgroundColor);
         // last shortcut doesn't need bottom margin
         final int count = viewGroup.getChildCount() - 1;
         for (int i = 0; i < count; i++) {
