@@ -66,10 +66,11 @@ fun LawnchairTheme(
 @Composable
 fun ComponentActivity.EdgeToEdge() {
     val darkTheme = isSelectedThemeDark
-    val scrimColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f).toArgb()
+    val opacity by preferenceManager().navigationBarOpacity.observeAsState()
+    val scrimColor = MaterialTheme.colorScheme.surface.copy(alpha = opacity.coerceIn(0, 100) / 100f).toArgb()
     val contentColor = MaterialTheme.colorScheme.onSurface.toArgb()
 
-    LaunchedEffect(darkTheme) {
+    LaunchedEffect(darkTheme, opacity, scrimColor, contentColor) {
         val statusBarStyle = SystemBarStyle.auto(
             Color.TRANSPARENT,
             Color.TRANSPARENT,
