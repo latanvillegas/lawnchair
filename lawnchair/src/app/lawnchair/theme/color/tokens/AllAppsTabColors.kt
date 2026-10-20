@@ -1,7 +1,7 @@
 package app.lawnchair.theme.color.tokens
 
 import android.content.Context
-import androidx.core.graphics.luminance
+import androidx.core.graphics.ColorUtils
 import app.lawnchair.preferences2.PreferenceManager2
 import app.lawnchair.preferences2.firstCached
 import app.lawnchair.theme.UiColorMode
@@ -34,10 +34,10 @@ object AllAppsTabColors {
         uiColorMode: UiColorMode,
     ): Int {
         val background = selectedBackground(context, scheme, uiColorMode)
-        return if (background.luminance > 0.5f) {
-            ColorTokens.Neutral1_900.resolveColor(context, scheme, uiColorMode)
+        return if (ColorUtils.calculateLuminance(background) > 0.179) {
+            android.graphics.Color.BLACK
         } else {
-            ColorTokens.Neutral1_50.resolveColor(context, scheme, uiColorMode)
+            android.graphics.Color.WHITE
         }
     }
 }
