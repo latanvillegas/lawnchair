@@ -63,7 +63,17 @@ sealed class ColorOption {
 
         override val colorPreferenceEntry = ColorPreferenceEntry<ColorOption>(
             this,
-            { stringResource(id = R.string.custom) },
+            {
+                when (color) {
+                    0xFFFF0000.toInt() -> "Rojo puro · #FF0000"
+                    0xFF00FF00.toInt() -> "Verde puro · #00FF00"
+                    0xFF0000FF.toInt() -> "Azul puro · #0000FF"
+                    0xFF00FFFF.toInt() -> "Cian puro · #00FFFF"
+                    0xFFFFFF00.toInt() -> "Amarillo puro · #FFFF00"
+                    0xFFFF00FF.toInt() -> "Magenta puro · #FF00FF"
+                    else -> stringResource(id = R.string.custom)
+                }
+            },
             { color },
         )
 
