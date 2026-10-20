@@ -135,24 +135,7 @@ fun HomeScreenPreferences(
             )
         }
         PreferenceGroup(heading = stringResource(id = R.string.wallpaper)) {
-            val wallpaperMode = prefs.homeWallpaperMode.getAdapter()
-            ListPreference(
-                adapter = wallpaperMode,
-                entries = listOf(
-                    ListPreferenceEntry("amoled") { stringResource(R.string.amoled_wallpaper_pure) },
-                    ListPreferenceEntry("system") { stringResource(R.string.amoled_wallpaper_system) },
-                    ListPreferenceEntry("custom") { stringResource(R.string.amoled_wallpaper_custom) },
-                ),
-                label = stringResource(R.string.amoled_wallpaper_mode),
-            )
-            ExpandAndShrink(visible = wallpaperMode.state.value == "custom") {
-                ClickablePreference(
-                    label = stringResource(R.string.amoled_wallpaper_choose),
-                    onClick = {
-                        context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER))
-                    },
-                )
-            }
+            HomeWallpaperModePreference()
             SwitchPreference(
                 prefs.wallpaperScrolling.getAdapter(),
                 label = stringResource(id = R.string.wallpaper_scrolling_label),
@@ -312,4 +295,28 @@ fun HomeScreenTextColorPreference(
         label = stringResource(id = R.string.home_screen_text_color),
         modifier = modifier,
     )
+}
+
+@Composable
+fun HomeWallpaperModePreference() {
+    val prefs = preferenceManager()
+    val context = LocalContext.current
+    val wallpaperMode = prefs.homeWallpaperMode.getAdapter()
+    ListPreference(
+        adapter = wallpaperMode,
+        entries = listOf(
+            ListPreferenceEntry("amoled") { stringResource(R.string.amoled_wallpaper_pure) },
+            ListPreferenceEntry("system") { stringResource(R.string.amoled_wallpaper_system) },
+            ListPreferenceEntry("custom") { stringResource(R.string.amoled_wallpaper_custom) },
+        ),
+        label = stringResource(R.string.amoled_wallpaper_mode),
+    )
+    ExpandAndShrink(visible = wallpaperMode.state.value == "custom") {
+        ClickablePreference(
+            label = stringResource(R.string.amoled_wallpaper_choose),
+            onClick = {
+                context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER))
+            },
+        )
+    }
 }
