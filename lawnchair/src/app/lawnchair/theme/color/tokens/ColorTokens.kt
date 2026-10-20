@@ -58,15 +58,15 @@ object ColorTokens {
 
     @JvmField val SearchResultSmallIcon = DayNightColorToken(Accent1_100, Accent2_800)
 
-    @JvmField val SurfaceContainerHighest = DayNightColorToken(StaticColorToken(0xFFFFFFFF.toInt()), StaticColorToken(0xFF000000.toInt()))
+    @JvmField val SurfaceContainerHighest = DayNightColorToken(StaticColorToken(0xFFFFFFFF), StaticColorToken(0xFF000000))
 
-    @JvmField val SurfaceContainerLow = DayNightColorToken(StaticColorToken(0xFFFFFFFF.toInt()), StaticColorToken(0xFF000000.toInt()))
+    @JvmField val SurfaceContainerLow = DayNightColorToken(StaticColorToken(0xFFFFFFFF), StaticColorToken(0xFF000000))
 
     val Scrim = Neutral1_0
     val Shadow = Neutral1_0
 
-    val SurfaceLight = StaticColorToken(0xFFFFFFFF.toInt())
-    val SurfaceDark = StaticColorToken(0xFF000000.toInt())
+    val SurfaceLight = StaticColorToken(0xFFFFFFFF)
+    val SurfaceDark = StaticColorToken(0xFF000000)
 
     @JvmField val Surface = DayNightColorToken(SurfaceLight, SurfaceDark)
 
@@ -89,7 +89,7 @@ object ColorTokens {
 
     @JvmField val TextColorPrimaryInverse = TextColorPrimary.inverse()
 
-    @JvmField val TextColorSecondary = DayNightColorToken(StaticColorToken(0xde000000), Neutral2_200)
+    @JvmField val TextColorSecondary = DayNightColorToken(StaticColorToken(0xDE000000), Neutral2_200)
 
     @JvmField val AllAppsHeaderProtectionColor = DayNightColorToken(SurfaceContainerHighest, SurfaceContainerLow)
 
