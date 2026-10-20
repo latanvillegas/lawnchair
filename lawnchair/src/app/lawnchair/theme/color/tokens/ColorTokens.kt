@@ -151,11 +151,11 @@ object ColorTokens {
 
     @JvmField val PopupColorTertiary = DayNightColorToken(SurfaceLight, SurfaceDark)
 
-    @JvmField val PopupShadeFirst = DayNightColorToken(PopupColorPrimary.setLStar(98.0), PopupColorPrimary.setLStar(20.0))
+    @JvmField val PopupShadeFirst = PopupColorPrimary
 
-    @JvmField val PopupShadeSecond = DayNightColorToken(PopupColorPrimary.setLStar(95.0), PopupColorPrimary.setLStar(15.0))
+    @JvmField val PopupShadeSecond = PopupColorPrimary
 
-    @JvmField val PopupShadeThird = DayNightColorToken(PopupColorPrimary.setLStar(90.0), PopupColorPrimary.setLStar(10.0))
+    @JvmField val PopupShadeThird = PopupColorPrimary
 
     @JvmField val PopupArrow = PopupShadeFirst
 
