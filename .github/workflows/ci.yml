@@ -54,10 +54,10 @@ jobs:
             -dname "CN=Lawnchair AMOLED Temporary, OU=Testing, O=Local, C=US" \
             -storepass "$password" -keypass "$password"
           {
-            printf 'storeFile=%s\\n' "$RUNNER_TEMP/lawnchair-temporary.jks"
-            printf 'storePassword=%s\\n' "$password"
-            printf 'keyAlias=%s\\n' 'lawnchair-temporary'
-            printf 'keyPassword=%s\\n' "$password"
+            printf 'storeFile=%s\n' "$RUNNER_TEMP/lawnchair-temporary.jks"
+            printf 'storePassword=%s\n' "$password"
+            printf 'keyAlias=%s\n' 'lawnchair-temporary'
+            printf 'keyPassword=%s\n' "$password"
           } > keystore.properties
           chmod 600 keystore.properties
           echo "::add-mask::$password"
@@ -81,7 +81,10 @@ jobs:
           distribution: 'zulu'
           java-version: 21
       - uses: gradle/actions/setup-gradle@v6
-      - run: ./gradlew spotlessCheck
+      - name: Format Kotlin sources in CI workspace
+        run: ./gradlew spotlessApply
+      - name: Verify Kotlin formatting
+        run: ./gradlew spotlessCheck
 
   send-notifications:
     runs-on: ubuntu-latest
