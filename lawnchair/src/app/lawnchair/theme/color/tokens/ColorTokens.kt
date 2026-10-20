@@ -110,7 +110,7 @@ object ColorTokens {
 
     @JvmField val GroupHighlightBlur = Surface.setAlpha(0.54f)
 
-    @JvmField val OverviewScrimColor = DayNightColorToken(Neutral2_100.setLStar(87.0), Neutral1_800)
+    @JvmField val OverviewScrimColor = DayNightColorToken(SurfaceLight, SurfaceDark)
 
     @JvmField val OverviewScrimOverBlurColor = DayNightColorToken(
         StaticColorToken(0x80FFFFFF),
@@ -195,7 +195,7 @@ object ColorTokens {
     // Material 3 Expressive
     @JvmField val ExpressiveAllApps = DayNightColorToken(Accent1_100, Accent1_800).setAlpha(0.5f)
 
-    @JvmField val BottomSheetBackgroundColorBlurFallback = DayNightColorToken(Accent2_200, Accent2_800)
+    @JvmField val BottomSheetBackgroundColorBlurFallback = DayNightColorToken(SurfaceLight, SurfaceDark)
 
     @JvmField val shade_panel_fg_color = DayNightColorToken(
         Accent1_100.setAlpha(0.32f),
