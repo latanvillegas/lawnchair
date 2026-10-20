@@ -290,15 +290,16 @@ class LawnchairLauncher : QuickstepLauncher() {
     )
 
     private fun applyHomeWallpaperMode() {
+        val launcherWindow = window ?: return
         val showWallpaper = prefs.homeWallpaperMode.get() != "amoled"
         if (showWallpaper) {
-            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
-            window.setBackgroundDrawableResource(android.R.color.transparent)
+            launcherWindow.addFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+            launcherWindow.setBackgroundDrawableResource(android.R.color.transparent)
         } else {
-            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+            launcherWindow.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
             val dark = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
                 android.content.res.Configuration.UI_MODE_NIGHT_YES
-            window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(if (dark) android.graphics.Color.BLACK else android.graphics.Color.WHITE))
+            launcherWindow.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(if (dark) android.graphics.Color.BLACK else android.graphics.Color.WHITE))
         }
     }
 
