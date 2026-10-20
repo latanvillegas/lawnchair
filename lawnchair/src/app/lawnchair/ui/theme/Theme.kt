@@ -42,6 +42,7 @@ import app.lawnchair.preferences.preferenceManager
 import app.lawnchair.preferences2.asState
 import app.lawnchair.preferences2.preferenceManager2
 import app.lawnchair.theme.color.ColorOption
+import app.lawnchair.ui.theme.getSystemAccent
 import app.lawnchair.theme.ThemeProvider
 import app.lawnchair.theme.toComposeColorScheme
 import app.lawnchair.ui.preferences.components.ThemeChoice
@@ -102,17 +103,36 @@ fun getColorScheme(darkTheme: Boolean): ColorScheme {
         ThemeProvider.INSTANCE.get(context).colorScheme
     }
 
-    // Exact pure RGB presets bypass Monet's softened accent shades.
-    // System, wallpaper, and other custom colors keep their existing palettes.
-    val pureAccent = (accentColor as? ColorOption.CustomColor)?.color?.takeIf {
-        it == ColorOption.PureRed.color ||
-            it == ColorOption.PureGreen.color ||
-            it == ColorOption.PureBlue.color ||
-            it == ColorOption.PureCyan.color ||
-            it == ColorOption.PureYellow.color ||
-            it == ColorOption.PureMagenta.color
+    // Convert system and wallpaper accents to full-intensity RGB as well.
+    // The Android light/dark selection remains independent of accent selection.
+    val sourceAccent = when (val selected = accentColor) {
+        is ColorOption.SystemAccent -> context.getSystemAccent(darkTheme)
+        is ColorOption.WallpaperPrimary ->
+            WallpaperManagerCompat.INSTANCE.get(context).wallpaperColors?.primaryColor
+                ?: ColorOption.LawnchairBlue.color
+        is ColorOption.CustomColor -> selected.color
+        else -> null
     }
+    val pureAccent = sourceAccent?.let(::toPureRgbAccent)
     return colorScheme.toComposeColorScheme(isDark = darkTheme, pureAccent = pureAccent)
+}
+
+/**
+ * Quantize an accent hue to a fully saturated RGB primary or secondary.
+ * The resulting color is always one of red, yellow, green, cyan, blue or magenta.
+ */
+private fun toPureRgbAccent(color: Int): Int {
+    val hsv = FloatArray(3)
+    Color.colorToHSV(color, hsv)
+    val index = ((hsv[0] / 60f + 0.5f).toInt() % 6 + 6) % 6
+    return intArrayOf(
+        Color.RED,
+        Color.YELLOW,
+        Color.GREEN,
+        Color.CYAN,
+        Color.BLUE,
+        Color.MAGENTA,
+    )[index]
 }
 
 private fun getPreviewColorScheme(darkTheme: Boolean) = if (darkTheme) {
