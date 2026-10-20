@@ -29,7 +29,7 @@ sealed class ColorOption {
     object PureBlack : ColorOption() {
         override val isSupported = true
         override val colorPreferenceEntry = ColorPreferenceEntry<ColorOption>(
-            this, { "Negro puro AMOLED/OLED" }, { Color.BLACK },
+            this, { "Negro puro AMOLED/OLED" }, { Color.BLACK }, { Color.BLACK },
         )
         override fun toString() = "pure_black"
     }
@@ -37,7 +37,7 @@ sealed class ColorOption {
     object PureWhite : ColorOption() {
         override val isSupported = true
         override val colorPreferenceEntry = ColorPreferenceEntry<ColorOption>(
-            this, { "Blanco puro" }, { Color.WHITE },
+            this, { "Blanco puro" }, { Color.WHITE }, { Color.WHITE },
         )
         override fun toString() = "pure_white"
     }
