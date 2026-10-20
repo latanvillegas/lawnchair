@@ -1073,4 +1073,10 @@
     <string name="lawnchair_action_failed">Failed to trigger action</string>
 
     <string name="please_wait">Please wait…</string>
+    <string name="amoled_development_warning">Development build: some features may not work correctly.</string>
+    <string name="amoled_wallpaper_mode">Home screen background</string>
+    <string name="amoled_wallpaper_pure">Pure AMOLED (default)</string>
+    <string name="amoled_wallpaper_system">System wallpaper</string>
+    <string name="amoled_wallpaper_custom">Custom wallpaper</string>
+    <string name="amoled_wallpaper_choose">Choose wallpaper</string>
 </resources>
