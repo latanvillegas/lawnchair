@@ -2,6 +2,9 @@
 
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.Lawnchair" parent="Base.Theme.Lawnchair">
+        <!-- Opaque home surface: do not expose the system wallpaper behind Launcher. -->
+        <item name="android:windowShowWallpaper">false</item>
+        <item name="android:windowBackground">?android:attr/colorBackground</item>
         <item name="android:colorBackground">@color/amoled_pure_black</item>
         <item name="android:windowLightStatusBar" >false</item>
         <item name="android:windowLightNavigationBar" tools:ignore="NewApi">false</item>
