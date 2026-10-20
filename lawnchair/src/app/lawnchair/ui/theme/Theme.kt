@@ -41,6 +41,7 @@ import app.lawnchair.preferences.observeAsState
 import app.lawnchair.preferences.preferenceManager
 import app.lawnchair.preferences2.asState
 import app.lawnchair.preferences2.preferenceManager2
+import app.lawnchair.theme.color.ColorOption
 import app.lawnchair.theme.ThemeProvider
 import app.lawnchair.theme.toComposeColorScheme
 import app.lawnchair.ui.preferences.components.ThemeChoice
@@ -101,7 +102,17 @@ fun getColorScheme(darkTheme: Boolean): ColorScheme {
         ThemeProvider.INSTANCE.get(context).colorScheme
     }
 
-    return colorScheme.toComposeColorScheme(isDark = darkTheme)
+    // Exact pure RGB presets bypass Monet's softened accent shades.
+    // System, wallpaper, and other custom colors keep their existing palettes.
+    val pureAccent = (accentColor as? ColorOption.CustomColor)?.color?.takeIf {
+        it == ColorOption.PureRed.color ||
+            it == ColorOption.PureGreen.color ||
+            it == ColorOption.PureBlue.color ||
+            it == ColorOption.PureCyan.color ||
+            it == ColorOption.PureYellow.color ||
+            it == ColorOption.PureMagenta.color
+    }
+    return colorScheme.toComposeColorScheme(isDark = darkTheme, pureAccent = pureAccent)
 }
 
 private fun getPreviewColorScheme(darkTheme: Boolean) = if (darkTheme) {
