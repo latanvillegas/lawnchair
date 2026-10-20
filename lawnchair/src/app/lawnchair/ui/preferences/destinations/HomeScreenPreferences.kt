@@ -17,6 +17,7 @@
 package app.lawnchair.ui.preferences.destinations
 
 import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +41,7 @@ import app.lawnchair.ui.preferences.components.NavigationActionPreference
 import app.lawnchair.ui.preferences.components.OverlayHandlerPreference
 import app.lawnchair.ui.preferences.components.controls.ClickablePreference
 import app.lawnchair.ui.preferences.components.controls.ListPreference
+import app.lawnchair.ui.preferences.components.controls.ListPreferenceEntry
 import app.lawnchair.ui.preferences.components.controls.SliderPreference
 import app.lawnchair.ui.preferences.components.controls.SwitchPreference
 import app.lawnchair.ui.preferences.components.layout.ExpandAndShrink
@@ -133,6 +135,24 @@ fun HomeScreenPreferences(
             )
         }
         PreferenceGroup(heading = stringResource(id = R.string.wallpaper)) {
+            val wallpaperMode = prefs.homeWallpaperMode.getAdapter()
+            ListPreference(
+                adapter = wallpaperMode,
+                entries = listOf(
+                    ListPreferenceEntry("amoled") { "AMOLED puro (predeterminado)" },
+                    ListPreferenceEntry("system") { "Fondo de pantalla del sistema" },
+                    ListPreferenceEntry("custom") { "Fondo personalizado" },
+                ),
+                label = "Fondo de la pantalla de inicio",
+            )
+            ExpandAndShrink(visible = wallpaperMode.state.value == "custom") {
+                ClickablePreference(
+                    label = "Seleccionar imagen",
+                    onClick = {
+                        context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER))
+                    },
+                )
+            }
             SwitchPreference(
                 prefs.wallpaperScrolling.getAdapter(),
                 label = stringResource(id = R.string.wallpaper_scrolling_label),
