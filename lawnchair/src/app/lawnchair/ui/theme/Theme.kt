@@ -66,7 +66,7 @@ fun LawnchairTheme(
 @Composable
 fun ComponentActivity.EdgeToEdge() {
     val darkTheme = isSelectedThemeDark
-    val scrimColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f).toArgb()
+    val scrimColor = MaterialTheme.colorScheme.surface.toArgb()
     val contentColor = MaterialTheme.colorScheme.onSurface.toArgb()
 
     LaunchedEffect(darkTheme) {
