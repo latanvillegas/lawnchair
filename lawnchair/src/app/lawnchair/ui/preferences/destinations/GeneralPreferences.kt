@@ -164,12 +164,13 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
         val showColorStyle = !(Utilities.ATLEAST_S && accentColorAdapter.state.value == ColorOption.SystemAccent) ||
             !Utilities.ATLEAST_S
 
-        PreferenceGroup(heading = stringResource(id = R.string.colors)) {
+        PreferenceGroup(heading = stringResource(id = R.string.amoled_appearance)) {
             ThemePreference()
             ColorPreference(preference = prefs2.accentColor)
             ExpandAndShrink(visible = showColorStyle) {
                 ColorStylePreference(prefs2.colorStyle.getAdapter())
             }
+            HomeWallpaperModePreference()
         }
 
         val notificationEnabled by remember { notificationDotsEnabled(context) }.collectAsStateWithLifecycle(initialValue = false)
