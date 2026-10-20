@@ -7,6 +7,9 @@ import app.lawnchair.theme.ResourceToken
 import app.lawnchair.theme.ThemeProvider
 import app.lawnchair.theme.UiColorMode
 import app.lawnchair.theme.color.AndroidColor
+import app.lawnchair.theme.color.ColorOption
+import app.lawnchair.preferences2.firstCached
+import android.graphics.Color as AndroidGraphicsColor
 import app.lawnchair.theme.toAndroidColor
 import com.android.launcher3.R
 import com.android.launcher3.util.Themes
@@ -36,6 +39,31 @@ data class SwatchColorToken(
 ) : ColorToken {
 
     override fun resolve(context: Context, scheme: ColorScheme, uiColorMode: UiColorMode): Color {
+        // Match Compose's pure AMOLED accent policy for classic Launcher3 views.
+        // Keep neutral swatches unchanged: they are used for text and scrims too.
+        if (swatch == Swatch.Accent1 || swatch == Swatch.Accent2 || swatch == Swatch.Accent3) {
+            val selected = app.lawnchair.preferences2.PreferenceManager2.getInstance(context)
+                .accentColor.firstCached()
+            val source = when (selected) {
+                is ColorOption.SystemAccent -> app.lawnchair.ui.theme.getSystemAccent(uiColorMode.isDarkTheme)
+                is ColorOption.WallpaperPrimary ->
+                    app.lawnchair.wallpaper.WallpaperManagerCompat.INSTANCE.get(context)
+                        .wallpaperColors?.primaryColor ?: ColorOption.LawnchairBlue.color
+                is ColorOption.CustomColor -> selected.color
+                else -> null
+            }
+            if (source != null) {
+                val hsv = FloatArray(3)
+                AndroidGraphicsColor.colorToHSV(source, hsv)
+                val index = ((hsv[0] / 60f + 0.5f).toInt() % 6 + 6) % 6
+                val vivid = intArrayOf(
+                    AndroidGraphicsColor.RED, AndroidGraphicsColor.YELLOW,
+                    AndroidGraphicsColor.GREEN, AndroidGraphicsColor.CYAN,
+                    AndroidGraphicsColor.BLUE, AndroidGraphicsColor.MAGENTA,
+                )[index]
+                return AndroidColor(vivid)
+            }
+        }
         val swatch = when (swatch) {
             Swatch.Neutral1 -> scheme.neutral1
             Swatch.Neutral2 -> scheme.neutral2
