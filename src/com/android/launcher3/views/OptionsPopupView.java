@@ -59,6 +59,7 @@ import com.google.android.msdl.data.model.MSDLToken;
 import java.util.ArrayList;
 import java.util.List;
 
+import app.lawnchair.preferences.PreferenceManager;
 import app.lawnchair.preferences2.PreferenceCacheExtensionsKt;
 import app.lawnchair.preferences2.PreferenceManager2;
 import app.lawnchair.ui.popup.LauncherOptionsPopup;
@@ -152,7 +153,11 @@ public class OptionsPopupView<T extends Context & ActivityContext> extends Arrow
 
     @Override
     public void assignMarginsAndBackgrounds(ViewGroup viewGroup) {
-        assignMarginsAndBackgrounds(viewGroup, mColors[0]);
+        final int opacity = Math.max(0, Math.min(100,
+                PreferenceManager.getInstance(getContext()).getHomePopupOpacity().get()));
+        final int backgroundColor = androidx.core.graphics.ColorUtils.setAlphaComponent(
+                mColors[0], Math.round(opacity * 255f / 100f));
+        assignMarginsAndBackgrounds(viewGroup, backgroundColor);
         // last shortcut doesn't need bottom margin
         final int count = viewGroup.getChildCount() - 1;
         for (int i = 0; i < count; i++) {
