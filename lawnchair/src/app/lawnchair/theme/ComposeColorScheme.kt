@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
+import androidx.core.graphics.ColorUtils
 import androidx.core.math.MathUtils
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -77,8 +78,20 @@ private fun delinearized(rgbComponent: Float): Int {
     return MathUtils.clamp((delinearized * 255.0).roundToInt(), 0, 255)
 }
 
+/**
+ * Pure RGB accent overrides Monet's shaded accent roles only for explicit RGB presets.
+ * Neutral surfaces remain pure black/white; foregrounds use whichever gives better contrast.
+ */
 @Composable
-fun dev.kdrag0n.monet.theme.ColorScheme.toComposeColorScheme(isDark: Boolean): ColorScheme = remember(this, isDark) {
+fun dev.kdrag0n.monet.theme.ColorScheme.toComposeColorScheme(
+    isDark: Boolean,
+    pureAccent: Int? = null,
+): ColorScheme = remember(this, isDark, pureAccent) {
+    val vivid = pureAccent?.let(::Color)
+    val onVivid = pureAccent?.let {
+        if (ColorUtils.calculateLuminance(it) > 0.179) Color.Black else Color.White
+    }
+
     val neutral4 = neutral(40).setLuminance(4f)
     val neutral6 = neutral(40).setLuminance(6f)
     val neutral12 = neutral(40).setLuminance(12f)
@@ -93,17 +106,17 @@ fun dev.kdrag0n.monet.theme.ColorScheme.toComposeColorScheme(isDark: Boolean): C
 
     if (isDark) {
         darkColorScheme(
-            primary = primary(80),
-            onPrimary = primary(20),
-            primaryContainer = primary(30),
-            onPrimaryContainer = primary(90),
-            inversePrimary = primary(40),
-            secondary = secondary(80),
-            onSecondary = secondary(20),
-            secondaryContainer = secondary(30),
-            onSecondaryContainer = secondary(90),
-            tertiary = tertiary(80),
-            onTertiary = tertiary(20),
+            primary = (vivid ?: primary(80)),
+            onPrimary = (onVivid ?: primary(20)),
+            primaryContainer = (vivid ?: primary(30)),
+            onPrimaryContainer = (onVivid ?: primary(90)),
+            inversePrimary = (vivid ?: primary(40)),
+            secondary = (vivid ?: secondary(80)),
+            onSecondary = (onVivid ?: secondary(20)),
+            secondaryContainer = (vivid ?: secondary(30)),
+            onSecondaryContainer = (onVivid ?: secondary(90)),
+            tertiary = (vivid ?: tertiary(80)),
+            onTertiary = (onVivid ?: tertiary(20)),
             background = Color.Black,
             onBackground = Color.White,
             surface = Color.Black,
@@ -122,23 +135,23 @@ fun dev.kdrag0n.monet.theme.ColorScheme.toComposeColorScheme(isDark: Boolean): C
             surfaceContainer = Color.Black,
             surfaceContainerLow = Color.Black,
             surfaceContainerLowest = Color.Black,
-            surfaceTint = primary(80),
+            surfaceTint = (vivid ?: primary(80)),
         )
     } else {
         lightColorScheme(
-            primary = primary(40),
-            onPrimary = primary(100),
-            primaryContainer = primary(90),
-            onPrimaryContainer = primary(10),
-            inversePrimary = primary(80),
-            secondary = secondary(40),
-            onSecondary = secondary(100),
-            secondaryContainer = secondary(90),
-            onSecondaryContainer = secondary(10),
-            tertiary = tertiary(40),
-            onTertiary = tertiary(100),
-            tertiaryContainer = tertiary(90),
-            onTertiaryContainer = tertiary(10),
+            primary = (vivid ?: primary(40)),
+            onPrimary = (onVivid ?: primary(100)),
+            primaryContainer = (vivid ?: primary(90)),
+            onPrimaryContainer = (onVivid ?: primary(10)),
+            inversePrimary = (vivid ?: primary(80)),
+            secondary = (vivid ?: secondary(40)),
+            onSecondary = (onVivid ?: secondary(100)),
+            secondaryContainer = (vivid ?: secondary(90)),
+            onSecondaryContainer = (onVivid ?: secondary(10)),
+            tertiary = (vivid ?: tertiary(40)),
+            onTertiary = (onVivid ?: tertiary(100)),
+            tertiaryContainer = (vivid ?: tertiary(90)),
+            onTertiaryContainer = (onVivid ?: tertiary(10)),
             background = Color.White,
             onBackground = Color.Black,
             surface = Color.White,
@@ -157,7 +170,7 @@ fun dev.kdrag0n.monet.theme.ColorScheme.toComposeColorScheme(isDark: Boolean): C
             surfaceContainer = Color.White,
             surfaceContainerLow = Color.White,
             surfaceContainerLowest = Color.White,
-            surfaceTint = primary(40),
+            surfaceTint = (vivid ?: primary(40)),
         )
     }
 }
