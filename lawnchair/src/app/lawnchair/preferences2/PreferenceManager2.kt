@@ -313,7 +313,7 @@ class PreferenceManager2 @Inject constructor(
         parse = ColorOption::fromString,
         save = ColorOption::toString,
         onSet = { reloadHelper.recreate() },
-        defaultValue = ColorOption.fromString(context.getString(R.string.config_default_accent_color)),
+        defaultValue = ColorOption.PureCyan,
     )
 
     val hiddenApps = preference(
