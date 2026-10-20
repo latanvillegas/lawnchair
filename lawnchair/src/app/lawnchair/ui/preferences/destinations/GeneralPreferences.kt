@@ -180,6 +180,20 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
                 step = 5,
                 showAsPercentage = true,
             )
+            SliderPreference(
+                label = stringResource(R.string.amoled_home_popup_opacity),
+                adapter = prefs.homePopupOpacity.getAdapter(),
+                valueRange = 0..100,
+                step = 5,
+                showAsPercentage = true,
+            )
+            SliderPreference(
+                label = stringResource(R.string.folder_bg_opacity_label),
+                adapter = prefs2.folderBackgroundOpacity.getAdapter(),
+                valueRange = 0f..1f,
+                step = 0.1f,
+                showAsPercentage = true,
+            )
             ClickablePreference(
                 label = stringResource(R.string.amoled_reset_appearance),
                 confirmationText = stringResource(R.string.amoled_reset_appearance_confirm),
@@ -188,6 +202,8 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
                     prefs2.accentColor.getAdapter().onChange(ColorOption.PureCyan)
                     prefs.homeWallpaperMode.getAdapter().onChange("amoled")
                     prefs.navigationBarOpacity.getAdapter().onChange(95)
+                    prefs.homePopupOpacity.getAdapter().onChange(100)
+                    prefs2.folderBackgroundOpacity.getAdapter().onChange(1f)
                 },
             )
         }
