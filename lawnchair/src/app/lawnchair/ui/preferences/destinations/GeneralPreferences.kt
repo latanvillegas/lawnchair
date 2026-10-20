@@ -38,6 +38,7 @@ import app.lawnchair.ui.preferences.components.NotificationDotsPreference
 import app.lawnchair.ui.preferences.components.ThemePreference
 import app.lawnchair.ui.preferences.components.colorpreference.ColorContrastWarning
 import app.lawnchair.ui.preferences.components.colorpreference.ColorPreference
+import app.lawnchair.ui.preferences.components.controls.ClickablePreference
 import app.lawnchair.ui.preferences.components.controls.ListPreference
 import app.lawnchair.ui.preferences.components.controls.ListPreferenceEntry
 import app.lawnchair.ui.preferences.components.controls.SliderPreference
@@ -178,6 +179,16 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
                 valueRange = 0..100,
                 step = 5,
                 showAsPercentage = true,
+            )
+            ClickablePreference(
+                label = stringResource(R.string.amoled_reset_appearance),
+                confirmationText = stringResource(R.string.amoled_reset_appearance_confirm),
+                onClick = {
+                    prefs.launcherTheme.getAdapter().onChange("system")
+                    prefs2.accentColor.getAdapter().onChange(ColorOption.PureCyan)
+                    prefs.homeWallpaperMode.getAdapter().onChange("amoled")
+                    prefs.navigationBarOpacity.getAdapter().onChange(95)
+                },
             )
         }
 
