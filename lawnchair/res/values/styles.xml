@@ -16,13 +16,13 @@
         <item name="allappsHeaderProtectionColor">@color/background_device_default_light</item>
         <item name="allAppsAlternateTextColor">@color/dark_drawer_text_color</item>
         <item name="focusHighlight">@color/system_neutral1_0</item>
-        <item name="groupHighlight">@color/surface_light</item>
+        <item name="groupHighlight">@color/amoled_pure_white</item>
         <item name="qsbFillColor">#ffffffff</item>
         <item name="qsbIconTintPrimary">#ff4285f4</item>
         <item name="qsbIconTintQuaternary">#ffea4335</item>
         <item name="qsbIconTintSecondary">#ff34a853</item>
         <item name="qsbIconTintTertiary">#fffbbc05</item>
-        <item name="searchboxHighlight">@color/surface_variant_light</item>
+        <item name="searchboxHighlight">@color/amoled_pure_white</item>
     </style>
     <style name="AppTheme.DarkMainColor" parent="@style/LauncherTheme.DarkMainColor">
         <item name="uiColorMode">4</item>
@@ -40,13 +40,13 @@
         <item name="allappsHeaderProtectionColor">@color/background_device_default_light</item>
         <item name="allAppsAlternateTextColor">@color/dark_drawer_text_color</item>
         <item name="focusHighlight">@color/system_neutral1_0</item>
-        <item name="groupHighlight">@color/surface_light</item>
+        <item name="groupHighlight">@color/amoled_pure_white</item>
         <item name="qsbFillColor">#ffffffff</item>
         <item name="qsbIconTintPrimary">#ff4285f4</item>
         <item name="qsbIconTintQuaternary">#ffea4335</item>
         <item name="qsbIconTintSecondary">#ff34a853</item>
         <item name="qsbIconTintTertiary">#fffbbc05</item>
-        <item name="searchboxHighlight">@color/surface_variant_light</item>
+        <item name="searchboxHighlight">@color/amoled_pure_white</item>
     </style>
     <style name="AppTheme.DarkText" parent="@style/LauncherTheme.DarkText">
         <item name="uiColorMode">2</item>
@@ -64,13 +64,13 @@
         <item name="allappsHeaderProtectionColor">@color/background_device_default_light</item>
         <item name="allAppsAlternateTextColor">?android:textColorSecondary</item>
         <item name="focusHighlight">@color/system_neutral1_0</item>
-        <item name="groupHighlight">@color/surface_light</item>
+        <item name="groupHighlight">@color/amoled_pure_white</item>
         <item name="qsbFillColor">#ffffffff</item>
         <item name="qsbIconTintPrimary">#ff4285f4</item>
         <item name="qsbIconTintQuaternary">#ffea4335</item>
         <item name="qsbIconTintSecondary">#ff34a853</item>
         <item name="qsbIconTintTertiary">#fffbbc05</item>
-        <item name="searchboxHighlight">@color/surface_variant_light</item>
+        <item name="searchboxHighlight">@color/amoled_pure_white</item>
     </style>
 
     <style name="AppTheme.Dark" parent="@style/LauncherTheme.Dark">
@@ -89,13 +89,13 @@
         <item name="allappsHeaderProtectionColor">@color/background_device_default_dark</item>
         <item name="allAppsAlternateTextColor">?android:textColorSecondary</item>
         <item name="focusHighlight">@color/system_neutral1_700</item>
-        <item name="groupHighlight">@color/surface_dark</item>
+        <item name="groupHighlight">@color/amoled_pure_black</item>
         <item name="qsbFillColor">@color/background_device_default_dark</item>
         <item name="qsbIconTintPrimary">#ff4285f4</item>
         <item name="qsbIconTintQuaternary">#ffea4335</item>
         <item name="qsbIconTintSecondary">#ff34a853</item>
         <item name="qsbIconTintTertiary">#fffbbc05</item>
-        <item name="searchboxHighlight">@color/surface_dark</item>
+        <item name="searchboxHighlight">@color/amoled_pure_black</item>
     </style>
     <style name="AppTheme.Dark.DarkMainColor" parent="@style/LauncherTheme.Dark.DarkMainColor">
         <item name="uiColorMode">5</item>
@@ -113,13 +113,13 @@
         <item name="allappsHeaderProtectionColor">@color/background_device_default_dark</item>
         <item name="allAppsAlternateTextColor">?android:textColorSecondary</item>
         <item name="focusHighlight">@color/system_neutral1_700</item>
-        <item name="groupHighlight">@color/surface_dark</item>
+        <item name="groupHighlight">@color/amoled_pure_black</item>
         <item name="qsbFillColor">@color/background_device_default_dark</item>
         <item name="qsbIconTintPrimary">#ff4285f4</item>
         <item name="qsbIconTintQuaternary">#ffea4335</item>
         <item name="qsbIconTintSecondary">#ff34a853</item>
         <item name="qsbIconTintTertiary">#fffbbc05</item>
-        <item name="searchboxHighlight">@color/surface_dark</item>
+        <item name="searchboxHighlight">@color/amoled_pure_black</item>
     </style>
     <style name="AppTheme.Dark.DarkText" parent="@style/LauncherTheme.Dark.DarkText">
         <item name="uiColorMode">3</item>
@@ -137,13 +137,13 @@
         <item name="allappsHeaderProtectionColor">@color/background_device_default_dark</item>
         <item name="allAppsAlternateTextColor">@color/light_drawer_text_color</item>
         <item name="focusHighlight">@color/system_neutral1_700</item>
-        <item name="groupHighlight">@color/surface_dark</item>
+        <item name="groupHighlight">@color/amoled_pure_black</item>
         <item name="qsbFillColor">@color/background_device_default_dark</item>
         <item name="qsbIconTintPrimary">#ff4285f4</item>
         <item name="qsbIconTintQuaternary">#ffea4335</item>
         <item name="qsbIconTintSecondary">#ff34a853</item>
         <item name="qsbIconTintTertiary">#fffbbc05</item>
-        <item name="searchboxHighlight">@color/surface_dark</item>
+        <item name="searchboxHighlight">@color/amoled_pure_black</item>
     </style>
 
     <style name="AllAppsSearchResult">
