@@ -139,15 +139,15 @@ fun HomeScreenPreferences(
             ListPreference(
                 adapter = wallpaperMode,
                 entries = listOf(
-                    ListPreferenceEntry("amoled") { "AMOLED puro (predeterminado)" },
-                    ListPreferenceEntry("system") { "Fondo de pantalla del sistema" },
-                    ListPreferenceEntry("custom") { "Fondo personalizado" },
+                    ListPreferenceEntry("amoled") { stringResource(R.string.amoled_wallpaper_pure) },
+                    ListPreferenceEntry("system") { stringResource(R.string.amoled_wallpaper_system) },
+                    ListPreferenceEntry("custom") { stringResource(R.string.amoled_wallpaper_custom) },
                 ),
-                label = "Fondo de la pantalla de inicio",
+                label = stringResource(R.string.amoled_wallpaper_mode),
             )
             ExpandAndShrink(visible = wallpaperMode.state.value == "custom") {
                 ClickablePreference(
-                    label = "Seleccionar imagen",
+                    label = stringResource(R.string.amoled_wallpaper_choose),
                     onClick = {
                         context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER))
                     },
