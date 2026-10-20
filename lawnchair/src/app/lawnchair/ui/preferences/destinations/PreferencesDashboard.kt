@@ -327,7 +327,7 @@ fun PreferencesDebugWarning(
     modifier: Modifier = Modifier,
 ) {
     WarningPreference(
-        text = "Versión de desarrollo: algunas funciones pueden presentar errores.",
+        text = stringResource(id = R.string.amoled_development_warning),
         modifier = modifier.padding(horizontal = 16.dp),
         standalone = true,
         colors = ListItemDefaults.segmentedColors(
