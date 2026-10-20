@@ -26,6 +26,6 @@
     <string name="amoled_appearance">Apariencia</string>
     <string name="amoled_navigation_opacity">Opacidad de la barra de navegación</string>
     <string name="amoled_reset_appearance">Restablecer apariencia</string>
-    <string name="amoled_reset_appearance_confirm">¿Restaurar el tema automático, acento cian puro, fondo AMOLED y opacidad de la barra de navegación al 95 %? No se modificarán los demás ajustes.</string>
+    <string name="amoled_reset_appearance_confirm">¿Restaurar el tema automático, acento cian puro, fondo AMOLED, opacidad de la barra de navegación al 95 % y menús y carpetas completamente opacos? No se modificarán los demás ajustes.</string>
     <string name="amoled_home_popup_opacity">Opacidad del menú de inicio</string>
 </resources>
