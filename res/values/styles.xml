@@ -75,7 +75,7 @@
         <item name="isFolderDarkText">true</item>
         <item name="folderTextColor">@color/folder_text_color_light</item>
         <item name="folderHintTextColor">@color/folder_hint_text_color_light</item>
-        <item name="appPairSurfaceInFolder">@color/materialColorSurfaceContainerLowest</item>
+        <item name="appPairSurfaceInFolder">#FFFFFFFF</item>
         <item name="loadingIconColor">#CCFFFFFF</item>
         <item name="iconOnlyShortcutColor">?android:attr/textColorSecondary</item>
         <item name="eduHalfSheetBGColor">?android:attr/colorAccent</item>
@@ -148,7 +148,7 @@
         <item name="isFolderDarkText">false</item>
         <item name="folderTextColor">@color/folder_text_color_dark</item>
         <item name="folderHintTextColor">@color/folder_hint_text_color_dark</item>
-        <item name="appPairSurfaceInFolder">@color/materialColorSurfaceContainerLowest</item>
+        <item name="appPairSurfaceInFolder">#FF000000</item>
         <item name="isMainColorDark">true</item>
         <item name="loadingIconColor">#99FFFFFF</item>
         <item name="iconOnlyShortcutColor">#B3FFFFFF</item>
