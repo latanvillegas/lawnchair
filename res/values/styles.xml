@@ -39,14 +39,14 @@
 
     <style name="LauncherTheme" parent="@style/DynamicColorsBaseLauncherTheme">
         <item name="android:textColorSecondary">#DE000000</item>
-        <item name="groupHighlight">@color/materialColorSurfaceContainerHigh</item>
+        <item name="groupHighlight">#FFFFFFFF</item>
         <item name="allAppsScrimColor">#FFFFFFFF</item>
         <item name="allappsHeaderProtectionColor">#FFFFFFFF</item>
         <item name="allAppsNavBarScrimColor">#66FFFFFF</item>
         <item name="allAppsSurfaceLow">#FFFFFFFF</item>
         <item name="allAppsSurfaceHighest">#FFFFFFFF</item>
-        <item name="allAppsUnselectedTab">@color/materialColorSurfaceBright</item>
-        <item name="privateSpaceSettingsColor">@color/materialColorSurfaceBright</item>
+        <item name="allAppsUnselectedTab">#FFFFFFFF</item>
+        <item name="privateSpaceSettingsColor">#FFFFFFFF</item>
         <item name="privateSpaceDividerColor">@color/materialColorOutlineVariant</item>
         <item name="bottomSheetDragHandleColor">@color/materialColorOutlineVariant</item>
         <item name="popupColorPrimary">@color/popup_color_primary_light</item>
@@ -70,7 +70,7 @@
         <item name="focusOutlineColor">@color/materialColorSecondaryFixed</item>
         <item name="focusInnerOutlineColor">@color/materialColorOnSecondaryFixedVariant</item>
         <item name="folderPreviewColor">@color/folder_preview_light</item>
-        <item name="folderBackgroundColor">@color/folder_background_light</item>
+        <item name="folderBackgroundColor">#FFFFFFFF</item>
         <item name="folderIconBorderColor">?android:attr/colorPrimary</item>
         <item name="isFolderDarkText">true</item>
         <item name="folderTextColor">@color/folder_text_color_light</item>
@@ -130,6 +130,8 @@
         <item name="allAppsSurfaceLow">#FF000000</item>
         <item name="allAppsSurfaceHighest">#FF000000</item>
         <item name="allAppsUnselectedTab">#FF000000</item>
+        <item name="groupHighlight">#FF000000</item>
+        <item name="privateSpaceSettingsColor">#FF000000</item>
         <item name="popupColorPrimary">@color/popup_color_primary_dark</item>
         <item name="popupColorSecondary">@color/popup_color_secondary_dark</item>
         <item name="popupColorTertiary">@color/popup_color_tertiary_dark</item>
@@ -143,7 +145,7 @@
         <item name="pageIndicatorDotColor">@color/page_indicator_dot_color_dark</item>
         <item name="pageIndicatorArrowBgColor">@color/page_indicator_arrow_bg_dark</item>
         <item name="folderPreviewColor">@color/folder_preview_dark</item>
-        <item name="folderBackgroundColor">@color/folder_background_dark</item>
+        <item name="folderBackgroundColor">#FF000000</item>
         <item name="folderIconBorderColor">?android:attr/colorPrimary</item>
         <item name="isFolderDarkText">false</item>
         <item name="folderTextColor">@color/folder_text_color_dark</item>
@@ -222,9 +224,9 @@
         <item name="android:textColorSecondary">?android:attr/textColorPrimary</item>
         <item name="android:colorEdgeEffect">?android:attr/textColorSecondary</item>
         <item name="widgetPickerPrimarySurfaceColor">
-            @color/widget_picker_primary_surface_color_light</item>
+            #FFFFFFFF</item>
         <item name="widgetPickerSecondarySurfaceColor">
-            @color/widget_picker_secondary_surface_color_light</item>
+            #FFFFFFFF</item>
         <item name="widgetPickerTitleColor">@color/widget_picker_title_color_light</item>
         <item name="widgetPickerDescriptionColor">@color/widget_picker_description_color_light</item>
         <item name="widgetPickerWidgetOptionsMenuColor">@color/widget_picker_menu_options_color_light</item>
@@ -233,16 +235,16 @@
         <item name="widgetPickerHeaderAppSubtitleColor">
             @color/widget_picker_header_app_subtitle_color_light</item>
         <item name="widgetPickerHeaderBackgroundColor">
-            @color/widget_picker_header_background_color_light</item>
+            #FFFFFFFF</item>
         <item name="widgetPickerSuggestionsIconBackgroundColor">
             @color/widget_picker_suggestions_icon_background_color_light</item>
         <item name="widgetPickerSuggestionsIconColor">
             @color/widget_picker_suggestions_icon_color_light</item>
         <item name="widgetPickerSearchTextColor">@color/widget_picker_search_text_color_light</item>
         <item name="widgetPickerTabBackgroundSelected">
-            @color/widget_picker_tab_background_selected_light</item>
+            #FFFFFFFF</item>
         <item name="widgetPickerTabBackgroundUnselected">
-            @color/widget_picker_tab_background_unselected_light</item>
+            #FFFFFFFF</item>
         <item name="widgetPickerSelectedTabTextColor">
             @color/widget_picker_selected_tab_text_color_light</item>
         <item name="widgetPickerUnselectedTabTextColor">
@@ -268,9 +270,9 @@
         <item name="android:colorEdgeEffect">?android:attr/textColorSecondary</item>
         <item name="android:colorPrimaryDark">#616161</item> <!-- Gray 700 -->
         <item name="widgetPickerPrimarySurfaceColor">
-            @color/widget_picker_primary_surface_color_dark</item>
+            #FF000000</item>
         <item name="widgetPickerSecondarySurfaceColor">
-            @color/widget_picker_secondary_surface_color_dark</item>
+            #FF000000</item>
         <item name="widgetPickerTitleColor">
             @color/widget_picker_title_color_dark</item>
         <item name="widgetPickerDescriptionColor">@color/widget_picker_description_color_dark</item>
@@ -280,16 +282,16 @@
         <item name="widgetPickerHeaderAppSubtitleColor">
             @color/widget_picker_header_app_subtitle_color_dark</item>
         <item name="widgetPickerHeaderBackgroundColor">
-            @color/widget_picker_header_background_color_dark</item>
+            #FF000000</item>
         <item name="widgetPickerSuggestionsIconBackgroundColor">
             @color/widget_picker_suggestions_icon_background_color_dark</item>
         <item name="widgetPickerSuggestionsIconColor">
             @color/widget_picker_suggestions_icon_color_dark</item>
         <item name="widgetPickerSearchTextColor">@color/widget_picker_search_text_color_dark</item>
         <item name="widgetPickerTabBackgroundSelected">
-            @color/widget_picker_tab_background_selected_dark</item>
+            #FF000000</item>
         <item name="widgetPickerTabBackgroundUnselected">
-            @color/widget_picker_tab_background_unselected_dark</item>
+            #FF000000</item>
         <item name="widgetPickerSelectedTabTextColor">
             @color/widget_picker_selected_tab_text_color_dark</item>
         <item name="widgetPickerUnselectedTabTextColor">
