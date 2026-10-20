@@ -41,9 +41,29 @@ jobs:
           distribution: 'zulu'
           java-version: 21
       - uses: gradle/actions/setup-gradle@v6
-      - name: Build unsigned release APK
+      - name: Generate temporary APK signing key
+        shell: bash
+        run: |
+          set -euo pipefail
+          password="$(openssl rand -hex 24)"
+          keytool -genkeypair -noprompt \
+            -keystore "$RUNNER_TEMP/lawnchair-temporary.jks" \
+            -storetype PKCS12 \
+            -alias lawnchair-temporary \
+            -keyalg RSA -keysize 3072 -validity 30 \
+            -dname "CN=Lawnchair AMOLED Temporary, OU=Testing, O=Local, C=US" \
+            -storepass "$password" -keypass "$password"
+          {
+            printf 'storeFile=%s\\n' "$RUNNER_TEMP/lawnchair-temporary.jks"
+            printf 'storePassword=%s\\n' "$password"
+            printf 'keyAlias=%s\\n' 'lawnchair-temporary'
+            printf 'keyPassword=%s\\n' "$password"
+          } > keystore.properties
+          chmod 600 keystore.properties
+          echo "::add-mask::$password"
+      - name: Build temporarily signed release APK
         run: ./gradlew assembleLawnWithQuickstepNightlyRelease
-      - name: Upload single unsigned release APK
+      - name: Upload single temporarily signed release APK
         uses: actions/upload-artifact@v7
         with:
           name: Lawnchair-AMOLED-Release
