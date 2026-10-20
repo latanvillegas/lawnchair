@@ -194,16 +194,22 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
                 step = 0.1f,
                 showAsPercentage = true,
             )
+            val themeResetAdapter = prefs.launcherTheme.getAdapter()
+            val accentResetAdapter = prefs2.accentColor.getAdapter()
+            val wallpaperResetAdapter = prefs.homeWallpaperMode.getAdapter()
+            val navigationResetAdapter = prefs.navigationBarOpacity.getAdapter()
+            val popupResetAdapter = prefs.homePopupOpacity.getAdapter()
+            val folderResetAdapter = prefs2.folderBackgroundOpacity.getAdapter()
             ClickablePreference(
                 label = stringResource(R.string.amoled_reset_appearance),
                 confirmationText = stringResource(R.string.amoled_reset_appearance_confirm),
                 onClick = {
-                    prefs.launcherTheme.getAdapter().onChange("system")
-                    prefs2.accentColor.getAdapter().onChange(ColorOption.PureCyan)
-                    prefs.homeWallpaperMode.getAdapter().onChange("amoled")
-                    prefs.navigationBarOpacity.getAdapter().onChange(95)
-                    prefs.homePopupOpacity.getAdapter().onChange(100)
-                    prefs2.folderBackgroundOpacity.getAdapter().onChange(1f)
+                    themeResetAdapter.onChange("system")
+                    accentResetAdapter.onChange(ColorOption.PureCyan)
+                    wallpaperResetAdapter.onChange("amoled")
+                    navigationResetAdapter.onChange(95)
+                    popupResetAdapter.onChange(100)
+                    folderResetAdapter.onChange(1f)
                 },
             )
         }
