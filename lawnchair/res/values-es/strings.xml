@@ -24,4 +24,5 @@
     <string name="amoled_wallpaper_custom">Fondo personalizado</string>
     <string name="amoled_wallpaper_choose">Seleccionar fondo</string>
     <string name="amoled_appearance">Apariencia</string>
+    <string name="amoled_navigation_opacity">Opacidad de la barra de navegación</string>
 </resources>
