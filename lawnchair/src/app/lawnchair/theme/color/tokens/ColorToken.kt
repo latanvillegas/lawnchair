@@ -3,14 +3,14 @@ package app.lawnchair.theme.color.tokens
 import android.content.Context
 import android.util.Log
 import androidx.core.graphics.ColorUtils
+import app.lawnchair.preferences2.firstCached
 import app.lawnchair.theme.ResourceToken
 import app.lawnchair.theme.ThemeProvider
 import app.lawnchair.theme.UiColorMode
 import app.lawnchair.theme.color.AndroidColor
 import app.lawnchair.theme.color.ColorOption
-import app.lawnchair.preferences2.firstCached
-import android.graphics.Color as AndroidGraphicsColor
 import app.lawnchair.theme.toAndroidColor
+import app.lawnchair.ui.theme.getSystemAccent
 import com.android.launcher3.R
 import com.android.launcher3.util.Themes
 import com.androidinternal.graphics.cam.Cam
@@ -45,7 +45,7 @@ data class SwatchColorToken(
             val selected = app.lawnchair.preferences2.PreferenceManager2.getInstance(context)
                 .accentColor.firstCached()
             val source = when (selected) {
-                is ColorOption.SystemAccent -> app.lawnchair.ui.theme.getSystemAccent(uiColorMode.isDarkTheme)
+                is ColorOption.SystemAccent -> context.getSystemAccent(uiColorMode.isDarkTheme)
                 is ColorOption.WallpaperPrimary ->
                     app.lawnchair.wallpaper.WallpaperManagerCompat.INSTANCE.get(context)
                         .wallpaperColors?.primaryColor ?: ColorOption.LawnchairBlue.color
