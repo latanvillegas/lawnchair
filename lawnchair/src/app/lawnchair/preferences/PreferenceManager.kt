@@ -120,6 +120,7 @@ class PreferenceManager @Inject constructor(
     val launcherTheme = StringPref("pref_launcherTheme", "system")
     val homeWallpaperMode = StringPref("pref_homeWallpaperMode", "amoled", recreate)
     val navigationBarOpacity = IntPref("pref_navigationBarOpacity", 95)
+    val homePopupOpacity = IntPref("pref_homePopupOpacity", 100, recreate)
     val overrideWindowCornerRadius = BoolPref("pref_overrideWindowCornerRadius", false, recreate)
     val windowCornerRadius = IntPref("pref_windowCornerRadius", 80, recreate)
     val autoLaunchRoot = BoolPref("pref_autoLaunchRoot", false)
