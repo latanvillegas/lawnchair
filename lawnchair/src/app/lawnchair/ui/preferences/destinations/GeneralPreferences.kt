@@ -171,6 +171,13 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
                 ColorStylePreference(prefs2.colorStyle.getAdapter())
             }
             HomeWallpaperModePreference()
+            SliderPreference(
+                label = stringResource(R.string.amoled_navigation_opacity),
+                adapter = prefs.navigationBarOpacity.getAdapter(),
+                valueRange = 0..100,
+                step = 5,
+                showAsPercentage = true,
+            )
         }
 
         val notificationEnabled by remember { notificationDotsEnabled(context) }.collectAsStateWithLifecycle(initialValue = false)
