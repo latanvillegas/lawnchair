@@ -1,6 +1,7 @@
 package app.lawnchair.ui.preferences.components.colorpreference
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -47,7 +48,8 @@ private fun ColorDot(
         modifier = modifier
             .size(30.dp)
             .clip(CircleShape)
-            .background(color = color),
+            .background(color = color)
+            .border(1.dp, Color.Gray, CircleShape),
     )
 }
 
