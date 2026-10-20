@@ -327,8 +327,7 @@ fun PreferencesDebugWarning(
     modifier: Modifier = Modifier,
 ) {
     WarningPreference(
-        // Don't move to strings.xml, no need to translate this warning
-        text = "You are using a development build, which may contain bugs and broken features. Use at your own risk!",
+        text = "Versión de desarrollo: algunas funciones pueden presentar errores.",
         modifier = modifier.padding(horizontal = 16.dp),
         standalone = true,
         colors = ListItemDefaults.segmentedColors(
