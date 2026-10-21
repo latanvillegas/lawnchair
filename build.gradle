@@ -160,6 +160,7 @@ android {
         buildConfigField "String", "MAJOR_VERSION", "\"${majorVersion}\""
         buildConfigField "String", "COMMIT_HASH", "\"${buildCommit}\""
         buildConfigField "boolean", "ENABLE_AUTO_INSTALLS_LAYOUT", "false"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders.quickstepMinSdk = quickstepMinSdk
         manifestPlaceholders.quickstepMaxSdk = quickstepMaxSdk
@@ -291,6 +292,9 @@ android {
         test {
             java.srcDirs += ['lawnchair/tests']
         }
+        androidTest {
+            java.srcDirs += ['lawnchair/src/androidTest']
+        }
         main {
             res.srcDirs = ['res']
 
@@ -382,6 +386,9 @@ addFrameworkJar('framework-16.jar')
 
 dependencies {
     testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'junit:junit:4.13.2'
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.test.runner
     implementation projects.iconloaderlib
     implementation projects.searchuilib
     implementation projects.animationlib
