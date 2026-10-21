@@ -19,7 +19,7 @@ import org.json.JSONObject
 object WorkspaceCompactionJournal {
     private const val FILE = "workspace_compaction_undo"
     private const val KEY = "pending"
-    private const val VERSION = 1
+    private const val VERSION = 2
 
     private fun encode(items: List<WorkspaceCompactionAdapter.SnapshotItem>): JSONArray =
         JSONArray().also { array ->
@@ -53,9 +53,12 @@ object WorkspaceCompactionJournal {
             )
         }
 
+    enum class Phase { COMPACTION, UNDO_INTENT }
+
     data class Record(
         val before: List<WorkspaceCompactionAdapter.SnapshotItem>,
         val after: List<WorkspaceCompactionAdapter.SnapshotItem>,
+        val phase: Phase = Phase.COMPACTION,
     )
 
     private fun prefs(context: Context) =
@@ -65,6 +68,7 @@ object WorkspaceCompactionJournal {
     fun save(context: Context, record: Record): Boolean {
         val json = JSONObject().apply {
             put("version", VERSION)
+            put("phase", record.phase.name)
             put("before", encode(record.before))
             put("after", encode(record.after))
         }
@@ -75,16 +79,25 @@ object WorkspaceCompactionJournal {
         val raw = prefs(context).getString(KEY, null) ?: return null
         return try {
             val json = JSONObject(raw)
-            require(json.getInt("version") == VERSION)
+            val version = json.getInt("version")
+            require(version == 1 || version == VERSION)
             val before = decode(json.getJSONArray("before"))
             val after = decode(json.getJSONArray("after"))
             require(before.map { it.id }.toSet().size == before.size)
             require(after.map { it.id }.toSet().size == after.size)
             require(before.map { it.id }.toSet() == after.map { it.id }.toSet())
-            Record(before, after)
+            Record(before, after, if (version == 1) Phase.COMPACTION else Phase.valueOf(json.getString("phase")))
         } catch (_: Exception) {
             null // Malformed journals are not automatically overwritten or applied.
         }
+    }
+
+    /** Persist undo intent before starting the SQLite restoration. */
+    fun markUndoIntent(context: Context, expected: Record): Boolean {
+        val current = load(context) ?: return false
+        if (current.before != expected.before || current.after != expected.after) return false
+        if (current.phase == Phase.UNDO_INTENT) return true
+        return save(context, current.copy(phase = Phase.UNDO_INTENT))
     }
 
     fun exists(context: Context): Boolean = prefs(context).contains(KEY)
