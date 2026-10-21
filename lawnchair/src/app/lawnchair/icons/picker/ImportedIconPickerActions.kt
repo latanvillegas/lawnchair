@@ -37,6 +37,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun ImportedIconPickerActions(
     onImported: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -75,7 +76,7 @@ fun ImportedIconPickerActions(
         ActivityResultContracts.OpenDocument(),
     ) { uri -> importSelected(uri) }
 
-    Column {
+    Column(modifier = modifier) {
         TextButton(onClick = { gallery.launch("image/*") }, enabled = !importing) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Icon(Icons.Outlined.PhotoLibrary, contentDescription = null)
