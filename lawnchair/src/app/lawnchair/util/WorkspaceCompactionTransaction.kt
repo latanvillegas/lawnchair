@@ -43,16 +43,27 @@ object WorkspaceCompactionTransaction {
         val record = WorkspaceCompactionJournal.load(context)
             ?: return RecoveryState.DIVERGED_OR_CORRUPT
         return try {
-            val current = readDesktop(context).toSet()
-            when {
-                current == record.after.toSet() && current.size == record.after.size ->
-                    RecoveryState.COMMITTED_UNDO_AVAILABLE
-                current == record.before.toSet() && current.size == record.before.size ->
-                    RecoveryState.BEFORE_WRITE
-                else -> RecoveryState.DIVERGED_OR_CORRUPT
-            }
+            classifyRecovery(record, readDesktop(context))
         } catch (_: Exception) {
             RecoveryState.DIVERGED_OR_CORRUPT
+        }
+    }
+
+    internal fun classifyRecovery(
+        record: WorkspaceCompactionJournal.Record,
+        current: List<WorkspaceCompactionAdapter.SnapshotItem>,
+    ): RecoveryState {
+        if (record.before.map { it.id }.toSet().size != record.before.size ||
+            record.after.map { it.id }.toSet().size != record.after.size ||
+            current.map { it.id }.toSet().size != current.size
+        ) return RecoveryState.DIVERGED_OR_CORRUPT
+        val actual = current.toSet()
+        return when {
+            actual == record.after.toSet() && current.size == record.after.size ->
+                RecoveryState.COMMITTED_UNDO_AVAILABLE
+            actual == record.before.toSet() && current.size == record.before.size ->
+                RecoveryState.BEFORE_WRITE
+            else -> RecoveryState.DIVERGED_OR_CORRUPT
         }
     }
 
