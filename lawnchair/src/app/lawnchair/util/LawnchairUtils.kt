@@ -224,8 +224,14 @@ fun resolveFolderBackgroundColor(context: Context): Int {
 private fun getAllAppsBaseColor(context: Context, defaultColor: Int): Int {
     val prefs2 = PreferenceManager2.getInstance(context)
     val colorOptions: ColorOption = prefs2.appDrawerBackgroundColor.firstCached()
-    val color = colorOptions.colorPreferenceEntry.lightColor.invoke(context)
-    val baseColor = if (color != 0) color else defaultColor
+    // System/default drawer backgrounds must follow the launcher light/dark mode,
+    // not the Material You accent or wallpaper color.
+    val nightMode = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+    val isDark = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+    val baseColor = when (colorOptions) {
+        ColorOption.SystemAccent, ColorOption.Default -> if (isDark) android.graphics.Color.BLACK else android.graphics.Color.WHITE
+        else -> colorOptions.colorPreferenceEntry.lightColor.invoke(context).takeIf { it != 0 } ?: defaultColor
+    }
     return ColorUtils.setAlphaComponent(baseColor, 255)
 }
 
