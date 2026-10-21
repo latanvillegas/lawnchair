@@ -151,8 +151,9 @@ object WorkspaceCompactionTransaction {
                     if (updated != 1) return false
                 }
                 transaction.commit()
-                committed = true
             }
+            // endTransaction() has completed successfully at this point.
+            committed = true
         } catch (_: Exception) {
             return false
         } finally {
