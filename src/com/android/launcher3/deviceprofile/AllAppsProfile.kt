@@ -198,6 +198,12 @@ data class AllAppsProfile(
                 maxAllAppsTextLineCount = cellContentDimensions.maxLineCount
             }
 
+            // Reserve enough vertical room for large icons and their labels.
+            allAppsCellHeightPx = max(
+                allAppsCellHeightPx,
+                allAppsIconSizePx + allAppsIconDrawablePaddingPx +
+                    Utilities.calculateTextHeight(allAppsIconTextSizePx) * maxAllAppsTextLineCount,
+            )
             allAppsCellHeightPx += responsiveAllAppsHeightSpec.gutterPx
 
             val allAppsProfile =
