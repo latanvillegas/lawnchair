@@ -161,7 +161,9 @@ SwitchPreference(
             }
         }
         ExpandAndShrink(visible = prefs2.enableFontSelection.asState().value) {
-            PreferenceGroup(heading = stringResource(id = R.string.font_label)) {
+            PreferenceGroupHeading(heading = stringResource(id = R.string.font_label))
+            GeneralAccentCard(accent = Color(0xFF607D8B)) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 FontPreference(
                     fontPref = prefs.fontWorkspace,
                     label = stringResource(R.string.fontWorkspace),
@@ -182,9 +184,9 @@ SwitchPreference(
                     fontPref = prefs.fontBodyMedium,
                     label = stringResource(R.string.fontBodyMedium),
                 )
+                }
             }
         }
-
         PreferenceGroupHeading(heading = stringResource(id = R.string.icons))
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             if (maxWidth >= 820.dp) {
