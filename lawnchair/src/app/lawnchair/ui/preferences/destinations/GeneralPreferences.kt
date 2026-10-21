@@ -178,14 +178,14 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
                 adapter = prefs.navigationBarOpacity.getAdapter(),
                 valueRange = 0..100,
                 step = 5,
-                showAsPercentage = true,
+                showUnit = "%",
             )
             SliderPreference(
                 label = stringResource(R.string.amoled_home_popup_opacity),
                 adapter = prefs.homePopupOpacity.getAdapter(),
                 valueRange = 0..100,
                 step = 5,
-                showAsPercentage = true,
+                showUnit = "%",
             )
             SliderPreference(
                 label = stringResource(R.string.folder_bg_opacity_label),
