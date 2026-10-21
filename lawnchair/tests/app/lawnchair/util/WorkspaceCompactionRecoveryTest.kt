@@ -40,4 +40,28 @@ class WorkspaceCompactionRecoveryTest {
             WorkspaceCompactionTransaction.classifyRecovery(record, listOf(item(0), item(0))),
         )
     }
+    @Test fun interruptedUndoBeforeSqliteRestorationStillAllowsUndo() {
+        val intent = record.copy(phase = WorkspaceCompactionJournal.Phase.UNDO_INTENT)
+        assertEquals(
+            WorkspaceCompactionTransaction.RecoveryState.COMMITTED_UNDO_AVAILABLE,
+            WorkspaceCompactionTransaction.classifyRecovery(intent, after),
+        )
+    }
+
+    @Test fun interruptedUndoAfterSqliteRestorationNeedsCleanup() {
+        val intent = record.copy(phase = WorkspaceCompactionJournal.Phase.UNDO_INTENT)
+        assertEquals(
+            WorkspaceCompactionTransaction.RecoveryState.UNDONE_PENDING_CLEANUP,
+            WorkspaceCompactionTransaction.classifyRecovery(intent, before),
+        )
+    }
+
+    @Test fun interruptedUndoWithLaterEditMustNotClearJournal() {
+        val intent = record.copy(phase = WorkspaceCompactionJournal.Phase.UNDO_INTENT)
+        assertEquals(
+            WorkspaceCompactionTransaction.RecoveryState.DIVERGED_OR_CORRUPT,
+            WorkspaceCompactionTransaction.classifyRecovery(intent, listOf(item(1))),
+        )
+    }
+
 }
