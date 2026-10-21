@@ -16,6 +16,10 @@
 
 package app.lawnchair.ui.preferences.components
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -44,7 +48,17 @@ fun NavigationActionPreference(
         title = { Text(text = label) },
         modifier = modifier,
         description = subtitle?.let { { Text(text = it) } },
-        endWidget = endWidget,
+        endWidget = endWidget ?: if (destination != null) {
+            {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+        } else {
+            null
+        },
         onClick = if (destination != null) {
             {
                 mMSDLPlayerWrapper.playToken(MSDLToken.TAP_MEDIUM_EMPHASIS)
