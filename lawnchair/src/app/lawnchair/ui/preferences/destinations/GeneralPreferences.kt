@@ -208,13 +208,41 @@ GeneralAccentCard(accent = Color(0xFF00BCD4)) { NavigationActionPreference(label
         val showColorStyle = !(Utilities.ATLEAST_S && accentColorAdapter.state.value == ColorOption.SystemAccent) ||
             !Utilities.ATLEAST_S
 
-        PreferenceGroup(heading = stringResource(id = R.string.amoled_appearance)) {
-            ThemePreference()
-            ColorPreference(preference = prefs2.accentColor)
-            ExpandAndShrink(visible = showColorStyle) {
-                ColorStylePreference(prefs2.colorStyle.getAdapter())
+        PreferenceGroupHeading(heading = stringResource(id = R.string.amoled_appearance))
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            if (maxWidth >= 760.dp) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        GeneralAccentCard(accent = Color(0xFF2196F3)) { ThemePreference() }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        GeneralAccentCard(accent = Color(0xFFE91E63)) { ColorPreference(preference = prefs2.accentColor) }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        ExpandAndShrink(visible = showColorStyle) {
+                            GeneralAccentCard(accent = Color(0xFF9C27B0)) {
+                                ColorStylePreference(prefs2.colorStyle.getAdapter())
+                            }
+                        }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        GeneralAccentCard(accent = Color(0xFF00BCD4)) { HomeWallpaperModePreference() }
+                    }
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    GeneralAccentCard(accent = Color(0xFF2196F3)) { ThemePreference() }
+                    GeneralAccentCard(accent = Color(0xFFE91E63)) { ColorPreference(preference = prefs2.accentColor) }
+                    ExpandAndShrink(visible = showColorStyle) {
+                        GeneralAccentCard(accent = Color(0xFF9C27B0)) {
+                            ColorStylePreference(prefs2.colorStyle.getAdapter())
+                        }
+                    }
+                    GeneralAccentCard(accent = Color(0xFF00BCD4)) { HomeWallpaperModePreference() }
+                }
             }
-            HomeWallpaperModePreference()
+        }
+        PreferenceGroup {
             SliderPreference(
                 label = stringResource(R.string.amoled_navigation_opacity),
                 adapter = prefs.navigationBarOpacity.getAdapter(),
