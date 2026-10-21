@@ -22,11 +22,11 @@ object ImportedIconStore {
 
     fun import(context: Context, source: Uri): String {
         val resolver = context.contentResolver
-        val mime = resolver.getType(source)
+        val mime = resolver.getType(source)?.lowercase()
         require(mime == null || mime in setOf("image/png", "image/jpeg", "image/webp")) {
             "Unsupported icon image type"
         }
-        val folder = File(context.filesDir, DIRECTORY).apply { mkdirs() }
+        val folder = File(context.filesDir, DIRECTORY).apply { check(isDirectory || mkdirs()) }
         val temporary = File.createTempFile("icon-", ".tmp", folder)
         try {
             var copied = 0L
@@ -47,6 +47,9 @@ object ImportedIconStore {
             val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             BitmapFactory.decodeFile(temporary.absolutePath, options)
             require(options.outWidth > 0 && options.outHeight > 0) { "Invalid image" }
+            require(options.outWidth.toLong() * options.outHeight <= 100_000_000L) {
+                "Icon dimensions exceed safe decode limits"
+            }
             val extension = when (mime ?: options.outMimeType) {
                 "image/png" -> "png"
                 "image/jpeg" -> "jpg"
