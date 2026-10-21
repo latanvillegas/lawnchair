@@ -18,6 +18,7 @@ package app.lawnchair.ui.preferences.destinations
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Box
@@ -294,6 +295,36 @@ GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.ScreenRotation
                     folderResetAdapter.onChange(1f)
                 },
             )
+        }
+
+        // On tablets, offer a real, immediately applicable accent palette.
+        PreferenceGroupHeading(heading = stringResource(id = R.string.color_style_label))
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            val selectedAccent = prefs2.accentColor.getAdapter()
+            val palette = listOf(
+                ColorOption.PureCyan to Color(0xFF00FFFF),
+            )
+            palette.forEach { (option, swatch) ->
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(MaterialTheme.shapes.large)
+                        .background(swatch)
+                        .border(
+                            width = if (selectedAccent.state.value == option) 3.dp else 1.dp,
+                            color = if (selectedAccent.state.value == option) {
+                                MaterialTheme.colorScheme.onSurface
+                            } else {
+                                MaterialTheme.colorScheme.outline
+                            },
+                            shape = MaterialTheme.shapes.large,
+                        )
+                        .clickable { selectedAccent.onChange(option) },
+                )
+            }
         }
 
         // Quick personalization actions reuse existing settings, not placeholder buttons.
