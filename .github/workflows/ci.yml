@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - '*-dev'
+      - 'feature/amoled-pure-colors'
     paths-ignore:
       - '.idea/**'
       - '.gitattributes'
