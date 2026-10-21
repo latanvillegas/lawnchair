@@ -288,6 +288,9 @@ android {
     }
 
     sourceSets {
+        test {
+            java.srcDirs += ['lawnchair/tests']
+        }
         main {
             res.srcDirs = ['res']
 
