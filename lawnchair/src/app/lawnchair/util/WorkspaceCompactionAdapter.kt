@@ -41,7 +41,7 @@ object WorkspaceCompactionAdapter {
             proposals.associate { it.screen.id to it.plan.reverseMoves() }
     }
 
-    fun capture(items: Collection<ItemInfo>): List<SnapshotItem> = items.map {
+    fun capture(items: Iterable<ItemInfo>): List<SnapshotItem> = items.map {
         SnapshotItem(
             id = it.id.toLong(),
             screenId = it.screenId,
