@@ -64,4 +64,63 @@ class WorkspaceCompactionRecoveryTest {
         )
     }
 
+    @Test fun unchangedBeforeAndAfterMustNotOfferUndo() {
+        val identical = WorkspaceCompactionJournal.Record(before, before)
+        assertEquals(
+            WorkspaceCompactionTransaction.RecoveryState.BEFORE_WRITE,
+            WorkspaceCompactionTransaction.classifyRecovery(identical, before),
+        )
+    }
+
+    @Test fun removedDesktopItemMustBlockRecovery() {
+        assertEquals(
+            WorkspaceCompactionTransaction.RecoveryState.DIVERGED_OR_CORRUPT,
+            WorkspaceCompactionTransaction.classifyRecovery(record, emptyList()),
+        )
+    }
+
+    @Test fun insertedDesktopItemMustBlockRecovery() {
+        val extra = item(3).copy(id = 2L)
+        assertEquals(
+            WorkspaceCompactionTransaction.RecoveryState.DIVERGED_OR_CORRUPT,
+            WorkspaceCompactionTransaction.classifyRecovery(record, after + extra),
+        )
+    }
+
+    @Test fun changedItemTypeMustBlockRecovery() {
+        assertEquals(
+            WorkspaceCompactionTransaction.RecoveryState.DIVERGED_OR_CORRUPT,
+            WorkspaceCompactionTransaction.classifyRecovery(
+                record, listOf(after.single().copy(itemType = Favorites.ITEM_TYPE_FOLDER)),
+            ),
+        )
+    }
+
+    @Test fun changedScreenMustBlockRecovery() {
+        assertEquals(
+            WorkspaceCompactionTransaction.RecoveryState.DIVERGED_OR_CORRUPT,
+            WorkspaceCompactionTransaction.classifyRecovery(
+                record, listOf(after.single().copy(screenId = 1)),
+            ),
+        )
+    }
+
+    @Test fun reorderedSnapshotDoesNotChangeRecoveryClassification() {
+        val secondBefore = item(4).copy(id = 2L)
+        val secondAfter = item(1).copy(id = 2L)
+        val multi = WorkspaceCompactionJournal.Record(before + secondBefore, after + secondAfter)
+        assertEquals(
+            WorkspaceCompactionTransaction.RecoveryState.COMMITTED_UNDO_AVAILABLE,
+            WorkspaceCompactionTransaction.classifyRecovery(multi, listOf(secondAfter, after.single())),
+        )
+    }
+
+    @Test fun duplicateIdsInJournalMustBlockRecovery() {
+        val corrupt = WorkspaceCompactionJournal.Record(before + before, after + after)
+        assertEquals(
+            WorkspaceCompactionTransaction.RecoveryState.DIVERGED_OR_CORRUPT,
+            WorkspaceCompactionTransaction.classifyRecovery(corrupt, after),
+        )
+    }
+
 }
