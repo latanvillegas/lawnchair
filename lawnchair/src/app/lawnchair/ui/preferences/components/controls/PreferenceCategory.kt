@@ -59,8 +59,11 @@ fun PreferenceCategory(
         modifier = modifier
             .clip(MaterialTheme.shapes.large)
             .background(
-                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
-                else MaterialTheme.colorScheme.surface,
+                if (isSelected) {
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+                } else {
+                    MaterialTheme.colorScheme.surface
+                },
             )
             .border(
                 width = if (isSelected) 1.5.dp else 0.dp,

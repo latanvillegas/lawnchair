@@ -107,10 +107,13 @@ fun getColorScheme(darkTheme: Boolean): ColorScheme {
     // The Android light/dark selection remains independent of accent selection.
     val sourceAccent = when (val selected = accentColor) {
         is ColorOption.SystemAccent -> context.getSystemAccent(darkTheme)
+
         is ColorOption.WallpaperPrimary ->
             WallpaperManagerCompat.INSTANCE.get(context).wallpaperColors?.primaryColor
                 ?: ColorOption.LawnchairBlue.color
+
         is ColorOption.CustomColor -> selected.color
+
         else -> null
     }
     val pureAccent = sourceAccent?.let(::toPureRgbAccent)

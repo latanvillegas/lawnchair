@@ -47,10 +47,13 @@ data class SwatchColorToken(
                 .accentColor.firstCached()
             val source = when (selected) {
                 is ColorOption.SystemAccent -> context.getSystemAccent(uiColorMode.isDarkTheme)
+
                 is ColorOption.WallpaperPrimary ->
                     app.lawnchair.wallpaper.WallpaperManagerCompat.INSTANCE.get(context)
                         .wallpaperColors?.primaryColor ?: ColorOption.LawnchairBlue.color
+
                 is ColorOption.CustomColor -> selected.color
+
                 else -> null
             }
             if (source != null) {
@@ -58,9 +61,12 @@ data class SwatchColorToken(
                 AndroidGraphicsColor.colorToHSV(source, hsv)
                 val index = ((hsv[0] / 60f + 0.5f).toInt() % 6 + 6) % 6
                 val vivid = intArrayOf(
-                    AndroidGraphicsColor.RED, AndroidGraphicsColor.YELLOW,
-                    AndroidGraphicsColor.GREEN, AndroidGraphicsColor.CYAN,
-                    AndroidGraphicsColor.BLUE, AndroidGraphicsColor.MAGENTA,
+                    AndroidGraphicsColor.RED,
+                    AndroidGraphicsColor.YELLOW,
+                    AndroidGraphicsColor.GREEN,
+                    AndroidGraphicsColor.CYAN,
+                    AndroidGraphicsColor.BLUE,
+                    AndroidGraphicsColor.MAGENTA,
                 )[index]
                 return AndroidColor(vivid)
             }

@@ -100,9 +100,11 @@ object ImportedIconStore {
         while (maxOf(bounds.outWidth, bounds.outHeight) / (sample * 2) >= targetPixels) {
             sample *= 2
         }
-        return requireNotNull(BitmapFactory.decodeFile(
-            file.absolutePath,
-            BitmapFactory.Options().apply { inSampleSize = sample },
-        ))
+        return requireNotNull(
+            BitmapFactory.decodeFile(
+                file.absolutePath,
+                BitmapFactory.Options().apply { inSampleSize = sample },
+            ),
+        )
     }
 }
