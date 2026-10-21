@@ -28,6 +28,7 @@ object WorkspaceCompactionTransaction {
     )
 
     private val inFlight = AtomicBoolean(false)
+    private val operationLock = Any()
 
     // Client callbacks must never be interpreted as persistence failures.
     // In particular, an exception thrown by a callback must not invoke it twice.
@@ -51,8 +52,10 @@ object WorkspaceCompactionTransaction {
     fun recoveryState(context: Context): RecoveryState {
         // Do not read a journal/DB pair while this process is mutating it.
         // External desktop writers are handled by full snapshot comparison.
-        if (inFlight.get()) return RecoveryState.DIVERGED_OR_CORRUPT
-        return inspectRecoveryState(context)
+        return synchronized(operationLock) {
+            if (inFlight.get()) RecoveryState.DIVERGED_OR_CORRUPT
+            else inspectRecoveryState(context)
+        }
     }
 
     private fun inspectRecoveryState(context: Context): RecoveryState {
@@ -201,6 +204,7 @@ object WorkspaceCompactionTransaction {
         val appContext = context.applicationContext
         Executors.MODEL_EXECUTOR.execute {
             try {
+                synchronized(operationLock) {
                 val model = LauncherAppState.getInstance(appContext).model
                 val before = result.preview.proposals.flatMap { it.snapshot }
                 val moves = result.preview.proposals.flatMap { it.plan.moves }
@@ -241,6 +245,7 @@ object WorkspaceCompactionTransaction {
                     return@execute
                 }
                 deliver(callback, Receipt(before, after, target, reverse))
+                }
             } catch (_: Exception) {
                 deliver(callback, null)
             } finally {
@@ -262,9 +267,11 @@ object WorkspaceCompactionTransaction {
         val appContext = context.applicationContext
         Executors.MODEL_EXECUTOR.execute {
             try {
+                synchronized(operationLock) {
                 val cleared = inspectRecoveryState(appContext) == RecoveryState.BEFORE_WRITE &&
                     WorkspaceCompactionJournal.clear(appContext)
                 deliver(callback, cleared)
+                }
             } catch (_: Exception) {
                 deliver(callback, false)
             } finally {
@@ -281,15 +288,16 @@ object WorkspaceCompactionTransaction {
     fun recover(context: Context): Receipt? {
         // A recovery receipt must never be built from an in-flight journal
         // transition. Callers must invoke this from MODEL_EXECUTOR.
-        if (inFlight.get()) return null
-        val record = WorkspaceCompactionJournal.load(context) ?: return null
+        return synchronized(operationLock) {
+        if (inFlight.get()) return@synchronized null
+        val record = WorkspaceCompactionJournal.load(context) ?: return@synchronized null
         val current = readDesktop(context)
         if (current.size != record.after.size ||
             current.toSet() != record.after.toSet()
-        ) return null
+        ) return@synchronized null
         val previous = record.before.associateBy { it.id }
         val changed = record.after.filter { previous[it.id] != it }
-        if (changed.isEmpty()) return null
+        if (changed.isEmpty()) return@synchronized null
         val reverse = changed.associate { it.id to
             WorkspaceCompactionPlanner.Position(
                 previous.getValue(it.id).cellX, previous.getValue(it.id).cellY,
@@ -298,7 +306,8 @@ object WorkspaceCompactionTransaction {
         val moves = changed.associate { it.id to
             WorkspaceCompactionPlanner.Position(it.cellX, it.cellY)
         }
-        return Receipt(record.before, record.after, moves, reverse)
+        Receipt(record.before, record.after, moves, reverse)
+        }
     }
 
     /** Clear only a completed undo, leaving divergent journals untouched. */
@@ -310,9 +319,11 @@ object WorkspaceCompactionTransaction {
         val appContext = context.applicationContext
         Executors.MODEL_EXECUTOR.execute {
             try {
+                synchronized(operationLock) {
                 val cleared = inspectRecoveryState(appContext) == RecoveryState.UNDONE_PENDING_CLEANUP &&
                     WorkspaceCompactionJournal.clear(appContext)
                 deliver(callback, cleared)
+                }
             } catch (_: Exception) {
                 deliver(callback, false)
             } finally {
@@ -330,6 +341,7 @@ object WorkspaceCompactionTransaction {
         val appContext = context.applicationContext
         Executors.MODEL_EXECUTOR.execute {
             try {
+                synchronized(operationLock) {
                 val stored = WorkspaceCompactionJournal.load(appContext)
                 if (stored == null || stored.before != receipt.before ||
                     stored.after != receipt.after
@@ -350,6 +362,7 @@ object WorkspaceCompactionTransaction {
                         inspectRecoveryState(appContext) == RecoveryState.UNDONE_PENDING_CLEANUP)
                 } else {
                     deliver(callback, false)
+                }
                 }
             } catch (_: Exception) {
                 deliver(callback, false)
