@@ -29,6 +29,33 @@ object WorkspaceCompactionTransaction {
 
     private val inFlight = AtomicBoolean(false)
 
+    enum class RecoveryState {
+        NONE, BEFORE_WRITE, COMMITTED_UNDO_AVAILABLE, DIVERGED_OR_CORRUPT
+    }
+
+    /**
+     * Inspect persistent state without changing any user layout.
+     * BEFORE_WRITE can arise when the process dies after journaling but
+     * before SQLite commits. Never silently clear a divergent journal.
+     */
+    fun recoveryState(context: Context): RecoveryState {
+        if (!WorkspaceCompactionJournal.exists(context)) return RecoveryState.NONE
+        val record = WorkspaceCompactionJournal.load(context)
+            ?: return RecoveryState.DIVERGED_OR_CORRUPT
+        return try {
+            val current = readDesktop(context).toSet()
+            when {
+                current == record.after.toSet() && current.size == record.after.size ->
+                    RecoveryState.COMMITTED_UNDO_AVAILABLE
+                current == record.before.toSet() && current.size == record.before.size ->
+                    RecoveryState.BEFORE_WRITE
+                else -> RecoveryState.DIVERGED_OR_CORRUPT
+            }
+        } catch (_: Exception) {
+            RecoveryState.DIVERGED_OR_CORRUPT
+        }
+    }
+
     private val projection = arrayOf(
         Favorites._ID, Favorites.SCREEN, Favorites.CONTAINER, Favorites.ITEM_TYPE,
         Favorites.CELLX, Favorites.CELLY, Favorites.SPANX, Favorites.SPANY,
@@ -167,10 +194,17 @@ object WorkspaceCompactionTransaction {
                     return@execute
                 }
                 if (!apply(appContext, before, target)) {
+                    // SQLite rolled back or rejected the update. Only remove
+                    // the journal when the original state is still present.
+                    if (recoveryState(appContext) == RecoveryState.BEFORE_WRITE) {
+                        WorkspaceCompactionJournal.clear(appContext)
+                    }
                     callback(null)
                     return@execute
                 }
                 callback(Receipt(before, after, target, reverse))
+            } catch (_: Exception) {
+                callback(null)
             } finally {
                 inFlight.set(false)
             }
@@ -221,6 +255,8 @@ object WorkspaceCompactionTransaction {
                 val restored = apply(appContext, receipt.after, receipt.reverse)
                 if (restored) WorkspaceCompactionJournal.clear(appContext)
                 callback(restored)
+            } catch (_: Exception) {
+                callback(false)
             } finally {
                 inFlight.set(false)
             }
