@@ -6,6 +6,7 @@ on:
       - feature/amoled-pure-colors
     paths:
       - 'lawnchair/src/app/lawnchair/ui/preferences/**'
+      - 'lawnchair/src/app/lawnchair/icons/**'
       - '.github/workflows/amoled-cards-validation.yml'
   workflow_dispatch:
 
