@@ -102,8 +102,7 @@ data class AllAppsProfile(
                     allAppsCellWidthPx =
                         (allAppsCellWidthPx * inv.numAllAppsColumns +
                             allAppsBorderSpacePx.x * numBorders) / inv.numAllAppsColumns
-                    allAppsIconSizePx =
-                        min(allAppsIconSizePx.toDouble(), allAppsCellWidthPx.toDouble()).toInt()
+                    // Keep the requested icon size even when the grid cell is narrower.
                     allAppsBorderSpacePx.x = 0
                 }
             }
@@ -176,11 +175,7 @@ data class AllAppsProfile(
             var allAppsCellHeightPx = responsiveAllAppsHeightSpec.cellSizePx
             var allAppsCellWidthPx = responsiveAllAppsWidthSpec.cellSizePx
 
-            // Reduce the size of the app icon if it doesn't fit
-            if (allAppsCellWidthPx < allAppsIconSizePx) {
-                // get a smaller icon size
-                allAppsIconSizePx = iconSizeSteps.getIconSmallerThan(allAppsCellWidthPx)
-            }
+            // Preserve the configured icon size in responsive grids.
 
             val cellContentDimensions =
                 CellContentDimensions(
@@ -192,13 +187,12 @@ data class AllAppsProfile(
             if (allAppsCellHeightPx < cellContentDimensions.getCellContentHeight()) {
                 if (isVerticalBarLayout) {
                     if (allAppsCellHeightPx < allAppsIconSizePx) {
-                        cellContentDimensions.iconSizePx =
-                            iconSizeSteps.getIconSmallerThan(allAppsCellHeightPx)
+                        // Keep the requested icon size in vertical layouts.
                     }
                 } else {
                     cellContentDimensions.resizeToFitCellHeight(allAppsCellHeightPx, iconSizeSteps)
                 }
-                allAppsIconSizePx = cellContentDimensions.iconSizePx
+                // Do not shrink the user-selected icon size to fit the cell.
                 allAppsIconDrawablePaddingPx = cellContentDimensions.iconDrawablePaddingPx
                 allAppsIconTextSizePx = cellContentDimensions.iconTextSizePx.toFloat()
                 maxAllAppsTextLineCount = cellContentDimensions.maxLineCount
