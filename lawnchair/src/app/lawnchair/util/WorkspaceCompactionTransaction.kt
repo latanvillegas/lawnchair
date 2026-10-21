@@ -49,6 +49,13 @@ object WorkspaceCompactionTransaction {
      * before SQLite commits. Never silently clear a divergent journal.
      */
     fun recoveryState(context: Context): RecoveryState {
+        // Do not read a journal/DB pair while this process is mutating it.
+        // External desktop writers are handled by full snapshot comparison.
+        if (inFlight.get()) return RecoveryState.DIVERGED_OR_CORRUPT
+        return inspectRecoveryState(context)
+    }
+
+    private fun inspectRecoveryState(context: Context): RecoveryState {
         if (!WorkspaceCompactionJournal.exists(context)) return RecoveryState.NONE
         val record = WorkspaceCompactionJournal.load(context)
             ?: return RecoveryState.DIVERGED_OR_CORRUPT
@@ -227,7 +234,7 @@ object WorkspaceCompactionTransaction {
                 if (!apply(appContext, before, target)) {
                     // SQLite rolled back or rejected the update. Only remove
                     // the journal when the original state is still present.
-                    if (recoveryState(appContext) == RecoveryState.BEFORE_WRITE) {
+                    if (inspectRecoveryState(appContext) == RecoveryState.BEFORE_WRITE) {
                         WorkspaceCompactionJournal.clear(appContext)
                     }
                     deliver(callback, null)
@@ -255,7 +262,7 @@ object WorkspaceCompactionTransaction {
         val appContext = context.applicationContext
         Executors.MODEL_EXECUTOR.execute {
             try {
-                val cleared = recoveryState(appContext) == RecoveryState.BEFORE_WRITE &&
+                val cleared = inspectRecoveryState(appContext) == RecoveryState.BEFORE_WRITE &&
                     WorkspaceCompactionJournal.clear(appContext)
                 deliver(callback, cleared)
             } catch (_: Exception) {
@@ -272,6 +279,9 @@ object WorkspaceCompactionTransaction {
      * on MODEL_EXECUTOR. An ambiguous or partially applied journal is refused.
      */
     fun recover(context: Context): Receipt? {
+        // A recovery receipt must never be built from an in-flight journal
+        // transition. Callers must invoke this from MODEL_EXECUTOR.
+        if (inFlight.get()) return null
         val record = WorkspaceCompactionJournal.load(context) ?: return null
         val current = readDesktop(context)
         if (current.size != record.after.size ||
@@ -300,7 +310,7 @@ object WorkspaceCompactionTransaction {
         val appContext = context.applicationContext
         Executors.MODEL_EXECUTOR.execute {
             try {
-                val cleared = recoveryState(appContext) == RecoveryState.UNDONE_PENDING_CLEANUP &&
+                val cleared = inspectRecoveryState(appContext) == RecoveryState.UNDONE_PENDING_CLEANUP &&
                     WorkspaceCompactionJournal.clear(appContext)
                 deliver(callback, cleared)
             } catch (_: Exception) {
@@ -337,7 +347,7 @@ object WorkspaceCompactionTransaction {
                 if (restored) {
                     val cleared = WorkspaceCompactionJournal.clear(appContext)
                     deliver(callback, cleared ||
-                        recoveryState(appContext) == RecoveryState.UNDONE_PENDING_CLEANUP)
+                        inspectRecoveryState(appContext) == RecoveryState.UNDONE_PENDING_CLEANUP)
                 } else {
                     deliver(callback, false)
                 }
