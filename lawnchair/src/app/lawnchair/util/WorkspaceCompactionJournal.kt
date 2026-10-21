@@ -87,5 +87,7 @@ object WorkspaceCompactionJournal {
         }
     }
 
+    fun exists(context: Context): Boolean = prefs(context).contains(KEY)
+
     fun clear(context: Context): Boolean = prefs(context).edit().remove(KEY).commit()
 }
