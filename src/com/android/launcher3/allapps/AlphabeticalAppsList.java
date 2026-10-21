@@ -30,6 +30,11 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_PRIVATE_SPACE_USER_INSTALLED_APPS_COUNT;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageInfo;
+import com.android.launcher3.LauncherPrefs;
+import java.util.Comparator;
+import java.util.HashMap;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ImageSpan;
@@ -257,8 +262,37 @@ public class AlphabeticalAppsList<T extends Context & ActivityContext> implement
                         .filter(mPrivateProviderManager.getItemInfoMatcher());
             }
         }
-        appSteam = appSteam.sorted(mAppNameComparator);
-        privateAppStream = privateAppStream.sorted(mAppNameComparator);
+        // Keep the default behavior identical to upstream Launcher3. Other modes are
+        // opt-in and only affect the app drawer; private-space apps remain isolated.
+        String sortMode = LauncherPrefs.getPrefs(mActivityContext)
+                .getString("pref_drawerSortMode", "default");
+        Comparator<AppInfo> drawerComparator = mAppNameComparator;
+        if ("za".equals(sortMode)) {
+            drawerComparator = mAppNameComparator.reversed();
+        } else if ("recent".equals(sortMode)) {
+            HashMap<String, Long> installTimes = new HashMap<>();
+            PackageManager pm = mActivityContext.getPackageManager();
+            for (AppInfo app : mAllAppsStore.getApps()) {
+                if (app.componentName == null) continue;
+                String pkg = app.componentName.getPackageName();
+                if (!installTimes.containsKey(pkg)) {
+                    long installed = 0L;
+                    try {
+                        PackageInfo info = pm.getPackageInfo(pkg, 0);
+                        installed = info.firstInstallTime;
+                    } catch (PackageManager.NameNotFoundException ignored) {
+                        // A package may disappear while the app list is refreshing.
+                    }
+                    installTimes.put(pkg, installed);
+                }
+            }
+            drawerComparator = Comparator.<AppInfo>comparingLong(app ->
+                    app.componentName == null ? 0L : installTimes.getOrDefault(
+                            app.componentName.getPackageName(), 0L))
+                    .reversed().thenComparing(mAppNameComparator);
+        }
+        appSteam = appSteam.sorted(drawerComparator);
+        privateAppStream = privateAppStream.sorted(drawerComparator);
 
         // As a special case for some languages (currently only Simplified Chinese), we may need to
         // coalesce sections
