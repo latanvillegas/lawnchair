@@ -1289,7 +1289,9 @@ public class DeviceProfile {
                     // cellWidth, and reduce iconSize.
                     cellWidthPx = (cellWidthPx * numColumns
                             + cellLayoutBorderSpacePx.x * numBorders) / numColumns;
-                    iconSizePx = Math.min(iconSizePx, cellWidthPx);
+                    // Lawnchair: honor the user-selected icon scale up to 250%.
+                    // Allow intentional icon overflow instead of silently capping the size.
+                    // Cell width remains bounded by the available workspace width.
                     cellLayoutBorderSpacePx.x = 0;
                 }
             }
