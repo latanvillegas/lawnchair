@@ -29,6 +29,16 @@ object WorkspaceCompactionTransaction {
 
     private val inFlight = AtomicBoolean(false)
 
+    // Client callbacks must never be interpreted as persistence failures.
+    // In particular, an exception thrown by a callback must not invoke it twice.
+    private fun <T> deliver(callback: (T) -> Unit, value: T) {
+        try {
+            callback(value)
+        } catch (_: Exception) {
+            // Transaction outcome is already fixed; do not retry client code.
+        }
+    }
+
     enum class RecoveryState {
         NONE, BEFORE_WRITE, COMMITTED_UNDO_AVAILABLE, DIVERGED_OR_CORRUPT
     }
@@ -169,7 +179,7 @@ object WorkspaceCompactionTransaction {
         callback: (Receipt?) -> Unit,
     ) {
         if (!inFlight.compareAndSet(false, true)) {
-            callback(null)
+            deliver(callback, null)
             return
         }
         val appContext = context.applicationContext
@@ -183,11 +193,11 @@ object WorkspaceCompactionTransaction {
                     !WorkspaceCompactionAdapter.stillMatches(result.preview, result.snapshot) ||
                     moves.size != target.size
                 ) {
-                    callback(null)
+                    deliver(callback, null)
                     return@execute
                 }
                 if (target.isEmpty()) {
-                    callback(null)
+                    deliver(callback, null)
                     return@execute
                 }
                 val reverse = moves.associate { it.id to it.from }
@@ -202,7 +212,7 @@ object WorkspaceCompactionTransaction {
                         appContext, WorkspaceCompactionJournal.Record(before, after),
                     )
                 ) {
-                    callback(null)
+                    deliver(callback, null)
                     return@execute
                 }
                 if (!apply(appContext, before, target)) {
@@ -211,12 +221,12 @@ object WorkspaceCompactionTransaction {
                     if (recoveryState(appContext) == RecoveryState.BEFORE_WRITE) {
                         WorkspaceCompactionJournal.clear(appContext)
                     }
-                    callback(null)
+                    deliver(callback, null)
                     return@execute
                 }
-                callback(Receipt(before, after, target, reverse))
+                deliver(callback, Receipt(before, after, target, reverse))
             } catch (_: Exception) {
-                callback(null)
+                deliver(callback, null)
             } finally {
                 inFlight.set(false)
             }
@@ -230,7 +240,7 @@ object WorkspaceCompactionTransaction {
      */
     fun discardUnappliedJournal(context: Context, callback: (Boolean) -> Unit) {
         if (!inFlight.compareAndSet(false, true)) {
-            callback(false)
+            deliver(callback, false)
             return
         }
         val appContext = context.applicationContext
@@ -238,9 +248,9 @@ object WorkspaceCompactionTransaction {
             try {
                 val cleared = recoveryState(appContext) == RecoveryState.BEFORE_WRITE &&
                     WorkspaceCompactionJournal.clear(appContext)
-                callback(cleared)
+                deliver(callback, cleared)
             } catch (_: Exception) {
-                callback(false)
+                deliver(callback, false)
             } finally {
                 inFlight.set(false)
             }
@@ -275,7 +285,7 @@ object WorkspaceCompactionTransaction {
     /** Undo is conditional: refuses to overwrite any subsequent desktop edits. */
     fun undo(context: Context, receipt: Receipt, callback: (Boolean) -> Unit) {
         if (!inFlight.compareAndSet(false, true)) {
-            callback(false)
+            deliver(callback, false)
             return
         }
         val appContext = context.applicationContext
@@ -285,14 +295,14 @@ object WorkspaceCompactionTransaction {
                 if (stored == null || stored.before != receipt.before ||
                     stored.after != receipt.after
                 ) {
-                    callback(false)
+                    deliver(callback, false)
                     return@execute
                 }
                 val restored = apply(appContext, receipt.after, receipt.reverse)
                 if (restored) WorkspaceCompactionJournal.clear(appContext)
-                callback(restored)
+                deliver(callback, restored)
             } catch (_: Exception) {
-                callback(false)
+                deliver(callback, false)
             } finally {
                 inFlight.set(false)
             }
