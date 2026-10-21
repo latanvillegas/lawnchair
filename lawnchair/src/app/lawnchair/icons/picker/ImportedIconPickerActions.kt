@@ -31,12 +31,12 @@ import kotlinx.coroutines.withContext
 
 /**
  * Reusable import actions for the per-app icon picker.
- * Calls [onImported] with the persisted filename, not a transient content URI.
+ * Calls [onImport] with the persisted filename, not a transient content URI.
  * The caller must register that filename with the selected app's icon override.
  */
 @Composable
 fun ImportedIconPickerActions(
-    onImported: (String) -> Unit,
+    onImport: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -98,7 +98,7 @@ fun ImportedIconPickerActions(
         }
         if (pendingIcon != null) {
             TextButton(onClick = {
-                pendingIcon?.let(onImported)
+                pendingIcon?.let(onImport)
                 pendingIcon = null
                 preview = null
             }) { Text("Use this icon") }
