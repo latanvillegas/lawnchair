@@ -33,10 +33,15 @@ object WorkspaceCompactionTransaction {
     // Client callbacks must never be interpreted as persistence failures.
     // In particular, an exception thrown by a callback must not invoke it twice.
     private fun <T> deliver(callback: (T) -> Unit, value: T) {
-        try {
-            callback(value)
-        } catch (_: Exception) {
-            // Transaction outcome is already fixed; do not retry client code.
+        // Always dispatch client code outside MODEL_EXECUTOR's transaction
+        // stack and outside operationLock. In particular, callbacks must not
+        // synchronously wait for another operation on MODEL_EXECUTOR.
+        Executors.MAIN_EXECUTOR.execute {
+            try {
+                callback(value)
+            } catch (_: Exception) {
+                // A client exception cannot change the persisted outcome.
+            }
         }
     }
 
@@ -191,7 +196,7 @@ object WorkspaceCompactionTransaction {
         return committed
     }
 
-    /** Executes on MODEL_EXECUTOR. Callback also runs on MODEL_EXECUTOR. */
+    /** Executes on MODEL_EXECUTOR. Callback is dispatched on MAIN_EXECUTOR. */
     fun commit(
         context: Context,
         result: WorkspaceCompactionModelReader.Result,
@@ -257,7 +262,7 @@ object WorkspaceCompactionTransaction {
     /**
      * Reconcile a crash after journal persistence but before the SQLite write.
      * Never erase a committed undo receipt or an ambiguous journal.
-     * Callback runs on MODEL_EXECUTOR.
+     * Callback is dispatched on MAIN_EXECUTOR.
      */
     fun discardUnappliedJournal(context: Context, callback: (Boolean) -> Unit) {
         if (!inFlight.compareAndSet(false, true)) {
