@@ -480,6 +480,18 @@ class PreferenceManager2 @Inject constructor(
         onSet = { reloadHelper.recreate() },
     )
 
+    val homeIconBrightness = preference(
+        key = floatPreferencesKey(name = "home_icon_brightness"),
+        defaultValue = 1f,
+        onSet = { reloadHelper.reloadGrid() },
+    )
+
+    val drawerIconBrightness = preference(
+        key = floatPreferencesKey(name = "drawer_icon_brightness"),
+        defaultValue = 1f,
+        onSet = { reloadHelper.reloadGrid() },
+    )
+
     val homeIconSizeFactor = preference(
         key = floatPreferencesKey(name = "home_icon_size_factor"),
         defaultValue = resourceProvider.getFloat(R.dimen.config_default_home_icon_size_factor),
