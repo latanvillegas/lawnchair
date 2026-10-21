@@ -328,6 +328,12 @@ public class Hotseat extends FrameLayout implements Insettable {
         boolean bubbleBarEnabled = activityContext.isBubbleBarEnabled();
         boolean hasBubbles = activityContext.hasBubbles();
         mHasVerticalHotseat = hasVerticalHotseat;
+        // Orientation changes rebuild the dock pages without reconstructing Hotseat.
+        // Reapply the preference so disabled icons never reappear in landscape.
+        boolean hotseatEnabled = PreferenceCacheExtensionsKt.firstCached(
+                preferenceManager2.isHotseatEnabled());
+        mIconsContainer.setVisibility(hotseatEnabled ? View.VISIBLE : View.GONE);
+        mIconsContainer.setEnabled(hotseatEnabled);
         DeviceProfile dp = mActivity.getDeviceProfile();
 
         mPagedView.resetPages(hasVerticalHotseat, mWorkspace, dp);
