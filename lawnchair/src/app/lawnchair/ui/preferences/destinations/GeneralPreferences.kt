@@ -20,13 +20,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Info
@@ -125,8 +125,8 @@ SwitchPreference(
 )
 } }
  Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+ if (BuildConfig.APPLICATION_ID.contains("nightly")) {
  GeneralAccentCard(accent = Color(0xFF9C27B0), icon = Icons.Filled.Refresh) {
-if (BuildConfig.APPLICATION_ID.contains("nightly")) {
  SwitchPreference(
  adapter = prefs2.autoUpdaterNightly.getAdapter(),
  label = stringResource(id = R.string.auto_updater_label),
@@ -200,7 +200,7 @@ SwitchPreference(
         }
         PreferenceGroupHeading(heading = stringResource(id = R.string.icons))
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            if (maxWidth >= 820.dp) {
+            if (maxWidth >= 1100.dp) {
 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
 Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF2196F3), icon = Icons.Filled.Palette) { NavigationActionPreference(label = stringResource(id = R.string.icon_pack), destination = GeneralIconPack, subtitle = currentIconPackName) } }
 Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFFE91E63), icon = Icons.Filled.Info) { NavigationActionPreference(label = stringResource(id = R.string.themed_icon_title), destination = GeneralThemedIcons, subtitle = themedIconsSubtitle) } }
@@ -223,7 +223,7 @@ GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.ScreenRotation
 
         PreferenceGroupHeading(heading = stringResource(id = R.string.amoled_appearance))
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            if (maxWidth >= 760.dp) {
+            if (maxWidth >= 1100.dp) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Column(modifier = Modifier.weight(1f)) {
                         GeneralAccentCard(accent = Color(0xFF2196F3), icon = Icons.Filled.Palette) { ThemePreference() }
