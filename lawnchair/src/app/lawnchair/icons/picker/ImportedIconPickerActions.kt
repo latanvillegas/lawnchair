@@ -3,7 +3,12 @@ package app.lawnchair.icons.picker
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,6 +35,8 @@ fun ImportedIconPickerActions(
     val scope = rememberCoroutineScope()
     var error by remember { mutableStateOf<String?>(null) }
     var importing by remember { mutableStateOf(false) }
+    var pendingIcon by remember { mutableStateOf<String?>(null) }
+    var preview by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
 
     fun importSelected(uri: Uri?) {
         if (uri == null || importing) return
@@ -40,7 +47,11 @@ fun ImportedIconPickerActions(
                 val name = withContext(Dispatchers.IO) {
                     ImportedIconStore.import(context, uri)
                 }
-                onImported(name)
+                val bitmap = withContext(Dispatchers.IO) {
+                    ImportedIconStore.decode(context, name, 512)
+                }
+                pendingIcon = name
+                preview = bitmap.asImageBitmap()
             } catch (exception: Exception) {
                 error = exception.localizedMessage ?: "Unable to import icon"
             } finally {
@@ -68,6 +79,16 @@ fun ImportedIconPickerActions(
             Text("Files")
         }
         if (importing) Text("Importing image…")
+        preview?.let { image ->
+            Image(bitmap = image, contentDescription = "Selected icon preview", modifier = Modifier.size(96.dp))
+        }
+        if (pendingIcon != null) {
+            TextButton(onClick = {
+                pendingIcon?.let(onImported)
+                pendingIcon = null
+                preview = null
+            }) { Text("Use this icon") }
+        }
         error?.let { Text(it) }
     }
 }
