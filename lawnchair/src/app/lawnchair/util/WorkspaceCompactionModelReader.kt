@@ -6,7 +6,6 @@ package app.lawnchair.util
 
 import android.content.Context
 import com.android.launcher3.LauncherAppState
-import com.android.launcher3.LauncherSettings
 import com.android.launcher3.util.Executors
 import java.util.function.Consumer
 
