@@ -63,7 +63,7 @@ fun PreferenceGroup(
                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f),
                     shape = MaterialTheme.shapes.large,
                 )
-                .padding(vertical = 6.dp),
+                .padding(vertical = 8.dp, horizontal = 8.dp),
             verticalArrangement = Arrangement.spacedBy(itemSpacing),
         ) {
             content()
@@ -81,8 +81,8 @@ fun PreferenceGroupHeading(
         Column(
             verticalArrangement = Arrangement.Center,
             modifier = modifier
-                .height(48.dp)
-                .padding(horizontal = 32.dp)
+                .height(44.dp)
+                .padding(horizontal = 28.dp)
                 .fillMaxWidth(),
         ) {
             Text(
@@ -94,7 +94,7 @@ fun PreferenceGroupHeading(
             )
         }
     } else {
-        Spacer(modifier = modifier.requiredHeight(8.dp))
+        Spacer(modifier = modifier.requiredHeight(12.dp))
     }
 }
 
