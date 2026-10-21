@@ -212,6 +212,13 @@ fun HomeScreenPreferences(
                 valueRange = 0.5F..2.5F,
                 showAsPercentage = true,
             )
+            SliderPreference(
+                label = "Brillo de iconos",
+                adapter = prefs2.homeIconBrightness.getAdapter(),
+                step = 0.05f,
+                valueRange = 0f..1f,
+                showAsPercentage = true,
+            )
             SwitchPreference(
                 adapter = homeScreenLabelsAdapter,
                 label = stringResource(id = R.string.show_labels),
