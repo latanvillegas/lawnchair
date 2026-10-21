@@ -113,6 +113,7 @@ class PreferenceManager @Inject constructor(
     val workspaceIncreaseMaxGridSize = BoolPref("pref_workspace_increase_max_grid_size", false)
     val folderRows = IdpIntPref("pref_folderRows", { numFolderRows[INDEX_DEFAULT] }, reloadGrid)
 
+    val drawerSortMode = StringPref("pref_drawerSortMode", "default", reloadIcons)
     val drawerOpacity = FloatPref("pref_drawerOpacity", 1f, recreate)
     val coloredBackgroundLightness = FloatPref("pref_coloredBackgroundLightness", 1F)
     val feedProvider = StringPref("pref_feedProvider", "")
