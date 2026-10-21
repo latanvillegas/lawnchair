@@ -152,20 +152,54 @@ object WorkspaceCompactionTransaction {
                     return@execute
                 }
                 val reverse = moves.associate { it.id to it.from }
-                if (!apply(appContext, before, target)) {
-                    callback(null)
-                    return@execute
-                }
                 val after = before.map { item ->
                     val destination = target[item.id]
                     if (destination == null) item
                     else item.copy(cellX = destination.x, cellY = destination.y)
+                }
+                // Never overwrite an unresolved journal from a previous operation.
+                if (WorkspaceCompactionJournal.load(appContext) != null ||
+                    !WorkspaceCompactionJournal.save(
+                        appContext, WorkspaceCompactionJournal.Record(before, after),
+                    )
+                ) {
+                    callback(null)
+                    return@execute
+                }
+                if (!apply(appContext, before, target)) {
+                    callback(null)
+                    return@execute
                 }
                 callback(Receipt(before, after, target, reverse))
             } finally {
                 inFlight.set(false)
             }
         }
+    }
+
+    /**
+     * Returns a durable undo receipt only when the database still exactly
+     * matches the journal's post-compaction state. The caller must run this
+     * on MODEL_EXECUTOR. An ambiguous or partially applied journal is refused.
+     */
+    fun recover(context: Context): Receipt? {
+        val record = WorkspaceCompactionJournal.load(context) ?: return null
+        val current = readDesktop(context)
+        if (current.size != record.after.size ||
+            current.toSet() != record.after.toSet()
+        ) return null
+        val previous = record.before.associateBy { it.id }
+        val changed = record.after.filter { previous[it.id] != it }
+        if (changed.isEmpty()) return null
+        val reverse = changed.associate { it.id to
+            WorkspaceCompactionPlanner.Position(
+                previous.getValue(it.id).cellX, previous.getValue(it.id).cellY,
+            )
+        }
+        val moves = changed.associate { it.id to
+            WorkspaceCompactionPlanner.Position(it.cellX, it.cellY)
+        }
+        return Receipt(record.before, record.after, moves, reverse)
     }
 
     /** Undo is conditional: refuses to overwrite any subsequent desktop edits. */
@@ -177,7 +211,16 @@ object WorkspaceCompactionTransaction {
         val appContext = context.applicationContext
         Executors.MODEL_EXECUTOR.execute {
             try {
-                callback(apply(appContext, receipt.after, receipt.reverse))
+                val stored = WorkspaceCompactionJournal.load(appContext)
+                if (stored == null || stored.before != receipt.before ||
+                    stored.after != receipt.after
+                ) {
+                    callback(false)
+                    return@execute
+                }
+                val restored = apply(appContext, receipt.after, receipt.reverse)
+                if (restored) WorkspaceCompactionJournal.clear(appContext)
+                callback(restored)
             } finally {
                 inFlight.set(false)
             }
