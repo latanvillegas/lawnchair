@@ -325,8 +325,15 @@ object WorkspaceCompactionTransaction {
                     return@execute
                 }
                 val restored = apply(appContext, receipt.after, receipt.reverse)
-                if (restored) WorkspaceCompactionJournal.clear(appContext)
-                deliver(callback, restored)
+                // SQLite restoration is durable even if journal cleanup fails.
+                // A remaining UNDO_INTENT journal is reconciled on the next run.
+                if (restored) {
+                    val cleared = WorkspaceCompactionJournal.clear(appContext)
+                    deliver(callback, cleared ||
+                        recoveryState(appContext) == RecoveryState.UNDONE_PENDING_CLEANUP)
+                } else {
+                    deliver(callback, false)
+                }
             } catch (_: Exception) {
                 deliver(callback, false)
             } finally {
