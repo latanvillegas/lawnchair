@@ -48,6 +48,8 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -921,9 +923,39 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     @Override
     public void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        drawDotIfNecessary(canvas);
-        drawRunningAppIndicatorIfNecessary(canvas);
+        // Apply brightness to the complete app tile (icon and label) without changing
+        // wallpaper brightness, device display brightness, or adjacent widgets.
+        final boolean drawerIcon = mDisplay == DISPLAY_ALL_APPS
+                || mDisplay == DISPLAY_PREDICTION_ROW
+                || mDisplay == DISPLAY_DRAWER_FOLDER;
+        final boolean homeIcon = mDisplay == DISPLAY_WORKSPACE;
+        float brightness = 1f;
+        if (drawerIcon) {
+            brightness = PreferenceCacheExtensionsKt.firstCached(pref2.getDrawerIconBrightness());
+        } else if (homeIcon) {
+            brightness = PreferenceCacheExtensionsKt.firstCached(pref2.getHomeIconBrightness());
+        }
+        brightness = Math.max(0f, Math.min(1f, brightness));
+        if ((homeIcon || drawerIcon) && brightness < 1f) {
+            final Paint brightnessPaint = new Paint();
+            final ColorMatrix matrix = new ColorMatrix(new float[]{
+                    brightness, 0f, 0f, 0f, 0f,
+                    0f, brightness, 0f, 0f, 0f,
+                    0f, 0f, brightness, 0f, 0f,
+                    0f, 0f, 0f, 1f, 0f
+            });
+            brightnessPaint.setColorFilter(new ColorMatrixColorFilter(matrix));
+            final int layer = canvas.saveLayer(
+                    0f, 0f, getWidth(), getHeight(), brightnessPaint);
+            super.onDraw(canvas);
+            drawDotIfNecessary(canvas);
+            drawRunningAppIndicatorIfNecessary(canvas);
+            canvas.restoreToCount(layer);
+        } else {
+            super.onDraw(canvas);
+            drawDotIfNecessary(canvas);
+            drawRunningAppIndicatorIfNecessary(canvas);
+        }
     }
 
     /**
