@@ -152,8 +152,8 @@ SwitchPreference(
  description = stringResource(id = R.string.home_screen_rotation_description),
 )
 }
+ if (BuildConfig.APPLICATION_ID.contains("nightly")) {
  GeneralAccentCard(accent = Color(0xFF9C27B0), icon = Icons.Filled.Refresh) {
-if (BuildConfig.APPLICATION_ID.contains("nightly")) {
  SwitchPreference(
  adapter = prefs2.autoUpdaterNightly.getAdapter(),
  label = stringResource(id = R.string.auto_updater_label),
