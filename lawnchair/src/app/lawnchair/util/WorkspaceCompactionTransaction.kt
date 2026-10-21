@@ -40,7 +40,7 @@ object WorkspaceCompactionTransaction {
     }
 
     enum class RecoveryState {
-        NONE, BEFORE_WRITE, COMMITTED_UNDO_AVAILABLE, DIVERGED_OR_CORRUPT
+        NONE, BEFORE_WRITE, COMMITTED_UNDO_AVAILABLE, UNDONE_PENDING_CLEANUP, DIVERGED_OR_CORRUPT
     }
 
     /**
@@ -72,7 +72,9 @@ object WorkspaceCompactionTransaction {
             actual == record.after.toSet() && current.size == record.after.size ->
                 RecoveryState.COMMITTED_UNDO_AVAILABLE
             actual == record.before.toSet() && current.size == record.before.size ->
-                RecoveryState.BEFORE_WRITE
+                if (record.phase == WorkspaceCompactionJournal.Phase.UNDO_INTENT)
+                    RecoveryState.UNDONE_PENDING_CLEANUP
+                else RecoveryState.BEFORE_WRITE
             else -> RecoveryState.DIVERGED_OR_CORRUPT
         }
     }
@@ -282,6 +284,26 @@ object WorkspaceCompactionTransaction {
         return Receipt(record.before, record.after, moves, reverse)
     }
 
+    /** Clear only a completed undo, leaving divergent journals untouched. */
+    fun discardCompletedUndoJournal(context: Context, callback: (Boolean) -> Unit) {
+        if (!inFlight.compareAndSet(false, true)) {
+            deliver(callback, false)
+            return
+        }
+        val appContext = context.applicationContext
+        Executors.MODEL_EXECUTOR.execute {
+            try {
+                val cleared = recoveryState(appContext) == RecoveryState.UNDONE_PENDING_CLEANUP &&
+                    WorkspaceCompactionJournal.clear(appContext)
+                deliver(callback, cleared)
+            } catch (_: Exception) {
+                deliver(callback, false)
+            } finally {
+                inFlight.set(false)
+            }
+        }
+    }
+
     /** Undo is conditional: refuses to overwrite any subsequent desktop edits. */
     fun undo(context: Context, receipt: Receipt, callback: (Boolean) -> Unit) {
         if (!inFlight.compareAndSet(false, true)) {
@@ -295,6 +317,10 @@ object WorkspaceCompactionTransaction {
                 if (stored == null || stored.before != receipt.before ||
                     stored.after != receipt.after
                 ) {
+                    deliver(callback, false)
+                    return@execute
+                }
+                if (!WorkspaceCompactionJournal.markUndoIntent(appContext, stored)) {
                     deliver(callback, false)
                     return@execute
                 }
