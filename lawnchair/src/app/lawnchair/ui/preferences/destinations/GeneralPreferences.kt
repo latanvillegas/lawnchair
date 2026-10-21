@@ -16,15 +16,23 @@
 
 package app.lawnchair.ui.preferences.destinations
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -94,64 +102,61 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
         label = stringResource(id = R.string.general_label),
         modifier = modifier,
     ) {
-        // The main controls become a two-column card dashboard on wide screens.
-        // Keep the same preference adapters so the cards remain fully functional.
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             if (maxWidth >= 680.dp) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        PreferenceGroup {
-                            SwitchPreference(
-                                adapter = prefs.allowRotation.getAdapter(),
-                                label = stringResource(id = R.string.home_screen_rotation_label),
-                                description = stringResource(id = R.string.home_screen_rotation_description),
-                            )
-                        }
-                    }
-                    Column(modifier = Modifier.weight(1f)) {
-                        PreferenceGroup(heading = stringResource(id = R.string.updater)) {
-                            if (BuildConfig.APPLICATION_ID.contains("nightly")) {
-                                SwitchPreference(
-                                    adapter = prefs2.autoUpdaterNightly.getAdapter(),
-                                    label = stringResource(id = R.string.auto_updater_label),
-                                    description = stringResource(id = R.string.auto_updater_description),
-                                )
-                            }
-                            SwitchPreference(
-                                adapter = liveInfoManager.enabled.getAdapter(),
-                                label = stringResource(id = R.string.live_information_label),
-                                description = stringResource(id = R.string.live_information_description),
-                            )
-                        }
-                    }
-                }
+Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+ Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF00BCD4)) {
+SwitchPreference(
+ adapter = prefs.allowRotation.getAdapter(),
+ label = stringResource(id = R.string.home_screen_rotation_label),
+ description = stringResource(id = R.string.home_screen_rotation_description),
+)
+} }
+ Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+ GeneralAccentCard(accent = Color(0xFF9C27B0)) {
+if (BuildConfig.APPLICATION_ID.contains("nightly")) {
+ SwitchPreference(
+ adapter = prefs2.autoUpdaterNightly.getAdapter(),
+ label = stringResource(id = R.string.auto_updater_label),
+ description = stringResource(id = R.string.auto_updater_description),
+ )
+}
+}
+ GeneralAccentCard(accent = Color(0xFFE91E63)) {
+SwitchPreference(
+ adapter = liveInfoManager.enabled.getAdapter(),
+ label = stringResource(id = R.string.live_information_label),
+ description = stringResource(id = R.string.live_information_description),
+)
+}
+ }
+}
             } else {
-                Column {
-                    PreferenceGroup {
-                        SwitchPreference(
-                        adapter = prefs.allowRotation.getAdapter(),
-                        label = stringResource(id = R.string.home_screen_rotation_label),
-                        description = stringResource(id = R.string.home_screen_rotation_description),
-                    )
-                }
-                PreferenceGroup(heading = stringResource(id = R.string.updater)) {
-                    if (BuildConfig.APPLICATION_ID.contains("nightly")) {
-                        SwitchPreference(
-                            adapter = prefs2.autoUpdaterNightly.getAdapter(),
-                            label = stringResource(id = R.string.auto_updater_label),
-                            description = stringResource(id = R.string.auto_updater_description),
-                        )
-                    }
-                    SwitchPreference(
-                        adapter = liveInfoManager.enabled.getAdapter(),
-                        label = stringResource(id = R.string.live_information_label),
-                        description = stringResource(id = R.string.live_information_description),
-                    )
-                }
-                }
+Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+ GeneralAccentCard(accent = Color(0xFF00BCD4)) {
+SwitchPreference(
+ adapter = prefs.allowRotation.getAdapter(),
+ label = stringResource(id = R.string.home_screen_rotation_label),
+ description = stringResource(id = R.string.home_screen_rotation_description),
+)
+}
+ GeneralAccentCard(accent = Color(0xFF9C27B0)) {
+if (BuildConfig.APPLICATION_ID.contains("nightly")) {
+ SwitchPreference(
+ adapter = prefs2.autoUpdaterNightly.getAdapter(),
+ label = stringResource(id = R.string.auto_updater_label),
+ description = stringResource(id = R.string.auto_updater_description),
+ )
+}
+}
+ GeneralAccentCard(accent = Color(0xFFE91E63)) {
+SwitchPreference(
+ adapter = liveInfoManager.enabled.getAdapter(),
+ label = stringResource(id = R.string.live_information_label),
+ description = stringResource(id = R.string.live_information_description),
+)
+}
+}
             }
         }
         ExpandAndShrink(visible = prefs2.enableFontSelection.asState().value) {
@@ -340,5 +345,30 @@ private fun NotificationDotColorContrastWarnings(
             text = stringResource(id = R.string.notification_dots_color_contrast_warning_always),
             modifier = modifier,
         )
+    }
+}
+
+@Composable
+private fun GeneralAccentCard(
+    accent: Color,
+    content: @Composable () -> Unit,
+) {
+    val shape = MaterialTheme.shapes.large
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(
+                Brush.linearGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.surface,
+                        accent.copy(alpha = 0.22f),
+                    ),
+                ),
+            )
+            .border(1.dp, accent.copy(alpha = 0.65f), shape)
+            .padding(8.dp),
+    ) {
+        content()
     }
 }
