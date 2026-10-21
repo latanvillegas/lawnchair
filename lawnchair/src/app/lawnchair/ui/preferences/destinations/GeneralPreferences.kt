@@ -296,6 +296,42 @@ GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.ScreenRotation
             )
         }
 
+        // Quick personalization actions reuse existing settings, not placeholder buttons.
+        PreferenceGroupHeading(heading = stringResource(id = R.string.amoled_appearance))
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            if (maxWidth >= 680.dp) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.Palette) {
+                            ColorPreference(preference = prefs2.accentColor)
+                        }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        GeneralAccentCard(accent = Color(0xFF7C4DFF), icon = Icons.Filled.Apps) {
+                            NavigationActionPreference(
+                                label = stringResource(id = R.string.icon_pack),
+                                destination = GeneralIconPack,
+                                subtitle = currentIconPackName,
+                            )
+                        }
+                    }
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.Palette) {
+                        ColorPreference(preference = prefs2.accentColor)
+                    }
+                    GeneralAccentCard(accent = Color(0xFF7C4DFF), icon = Icons.Filled.Apps) {
+                        NavigationActionPreference(
+                            label = stringResource(id = R.string.icon_pack),
+                            destination = GeneralIconPack,
+                            subtitle = currentIconPackName,
+                        )
+                    }
+                }
+            }
+        }
+
         val notificationEnabled by remember { notificationDotsEnabled(context) }.collectAsStateWithLifecycle(initialValue = false)
         val serviceEnabled = notificationServiceEnabled()
         val showNotificationCountAdapter = prefs2.showNotificationCount.getAdapter()
