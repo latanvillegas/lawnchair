@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.weight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -130,8 +129,9 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
                     }
                 }
             } else {
-                PreferenceGroup {
-                    SwitchPreference(
+                Column {
+                    PreferenceGroup {
+                        SwitchPreference(
                         adapter = prefs.allowRotation.getAdapter(),
                         label = stringResource(id = R.string.home_screen_rotation_label),
                         description = stringResource(id = R.string.home_screen_rotation_description),
@@ -150,6 +150,7 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
                         label = stringResource(id = R.string.live_information_label),
                         description = stringResource(id = R.string.live_information_description),
                     )
+                }
                 }
             }
         }
