@@ -16,12 +16,19 @@
 
 package app.lawnchair.ui.preferences.destinations
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.weight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.lawnchair.preferences.PreferenceAdapter
 import app.lawnchair.preferences.getAdapter
@@ -88,26 +95,63 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
         label = stringResource(id = R.string.general_label),
         modifier = modifier,
     ) {
-        PreferenceGroup {
-            SwitchPreference(
-                adapter = prefs.allowRotation.getAdapter(),
-                label = stringResource(id = R.string.home_screen_rotation_label),
-                description = stringResource(id = R.string.home_screen_rotation_description),
-            )
-        }
-        PreferenceGroup(heading = stringResource(id = R.string.updater)) {
-            if (BuildConfig.APPLICATION_ID.contains("nightly")) {
-                SwitchPreference(
-                    adapter = prefs2.autoUpdaterNightly.getAdapter(),
-                    label = stringResource(id = R.string.auto_updater_label),
-                    description = stringResource(id = R.string.auto_updater_description),
-                )
+        // The main controls become a two-column card dashboard on wide screens.
+        // Keep the same preference adapters so the cards remain fully functional.
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            if (maxWidth >= 680.dp) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        PreferenceGroup {
+                            SwitchPreference(
+                                adapter = prefs.allowRotation.getAdapter(),
+                                label = stringResource(id = R.string.home_screen_rotation_label),
+                                description = stringResource(id = R.string.home_screen_rotation_description),
+                            )
+                        }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        PreferenceGroup(heading = stringResource(id = R.string.updater)) {
+                            if (BuildConfig.APPLICATION_ID.contains("nightly")) {
+                                SwitchPreference(
+                                    adapter = prefs2.autoUpdaterNightly.getAdapter(),
+                                    label = stringResource(id = R.string.auto_updater_label),
+                                    description = stringResource(id = R.string.auto_updater_description),
+                                )
+                            }
+                            SwitchPreference(
+                                adapter = liveInfoManager.enabled.getAdapter(),
+                                label = stringResource(id = R.string.live_information_label),
+                                description = stringResource(id = R.string.live_information_description),
+                            )
+                        }
+                    }
+                }
+            } else {
+                PreferenceGroup {
+                    SwitchPreference(
+                        adapter = prefs.allowRotation.getAdapter(),
+                        label = stringResource(id = R.string.home_screen_rotation_label),
+                        description = stringResource(id = R.string.home_screen_rotation_description),
+                    )
+                }
+                PreferenceGroup(heading = stringResource(id = R.string.updater)) {
+                    if (BuildConfig.APPLICATION_ID.contains("nightly")) {
+                        SwitchPreference(
+                            adapter = prefs2.autoUpdaterNightly.getAdapter(),
+                            label = stringResource(id = R.string.auto_updater_label),
+                            description = stringResource(id = R.string.auto_updater_description),
+                        )
+                    }
+                    SwitchPreference(
+                        adapter = liveInfoManager.enabled.getAdapter(),
+                        label = stringResource(id = R.string.live_information_label),
+                        description = stringResource(id = R.string.live_information_description),
+                    )
+                }
             }
-            SwitchPreference(
-                adapter = liveInfoManager.enabled.getAdapter(),
-                label = stringResource(id = R.string.live_information_label),
-                description = stringResource(id = R.string.live_information_description),
-            )
         }
         ExpandAndShrink(visible = prefs2.enableFontSelection.asState().value) {
             PreferenceGroup(heading = stringResource(id = R.string.font_label)) {
