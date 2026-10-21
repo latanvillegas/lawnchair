@@ -37,9 +37,14 @@ object WorkspaceCompactionModelReader {
             val loadId = model.lastLoadId
             // Copy *every* item first, not only the movable icons, while on
             // the model thread. Fixed desktop items are needed for occupancy.
+            val workspaceVersion = dataModel.itemsIdMap.version
             val snapshot = WorkspaceCompactionAdapter.capture(
                 dataModel.itemsIdMap.toList(),
             )
+            if (dataModel.itemsIdMap.version != workspaceVersion) {
+                callback(null)
+                return@Consumer
+            }
             val preview = WorkspaceCompactionAdapter.previewAll(screens, snapshot)
             callback(
                 if (preview != null && model.isModelLoaded() && model.lastLoadId == loadId) {
