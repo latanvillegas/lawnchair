@@ -1,13 +1,16 @@
 package app.lawnchair.ui.preferences.components.controls
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -21,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import app.lawnchair.preferences.PreferenceAdapter
@@ -112,7 +116,16 @@ fun MainSwitchPreference(
     }
 
     Column(
-        modifier.padding(horizontal = contentPadding),
+        modifier
+            .padding(horizontal = contentPadding)
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.large)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f),
+                shape = MaterialTheme.shapes.large,
+            ),
     ) {
         SegmentedListItem(
             onClick = { wrappedOnCheckedChange(!checked) },
@@ -152,8 +165,8 @@ fun MainSwitchPreference(
                 )
             },
             colors = ListItemDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                containerColor = MaterialTheme.colorScheme.surface,
+                selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                 disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
             ),
         ) {
