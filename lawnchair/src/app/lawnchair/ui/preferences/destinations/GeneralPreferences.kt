@@ -24,7 +24,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.ScreenRotation
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -106,7 +120,7 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             if (maxWidth >= 680.dp) {
 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
- Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF00BCD4)) {
+ Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.ScreenRotation) {
 SwitchPreference(
  adapter = prefs.allowRotation.getAdapter(),
  label = stringResource(id = R.string.home_screen_rotation_label),
@@ -114,7 +128,7 @@ SwitchPreference(
 )
 } }
  Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
- GeneralAccentCard(accent = Color(0xFF9C27B0)) {
+ GeneralAccentCard(accent = Color(0xFF9C27B0), icon = Icons.Filled.Refresh) {
 if (BuildConfig.APPLICATION_ID.contains("nightly")) {
  SwitchPreference(
  adapter = prefs2.autoUpdaterNightly.getAdapter(),
@@ -123,7 +137,7 @@ if (BuildConfig.APPLICATION_ID.contains("nightly")) {
  )
 }
 }
- GeneralAccentCard(accent = Color(0xFFE91E63)) {
+ GeneralAccentCard(accent = Color(0xFFE91E63), icon = Icons.Filled.Info) {
 SwitchPreference(
  adapter = liveInfoManager.enabled.getAdapter(),
  label = stringResource(id = R.string.live_information_label),
@@ -134,14 +148,14 @@ SwitchPreference(
 }
             } else {
 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
- GeneralAccentCard(accent = Color(0xFF00BCD4)) {
+ GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.ScreenRotation) {
 SwitchPreference(
  adapter = prefs.allowRotation.getAdapter(),
  label = stringResource(id = R.string.home_screen_rotation_label),
  description = stringResource(id = R.string.home_screen_rotation_description),
 )
 }
- GeneralAccentCard(accent = Color(0xFF9C27B0)) {
+ GeneralAccentCard(accent = Color(0xFF9C27B0), icon = Icons.Filled.Refresh) {
 if (BuildConfig.APPLICATION_ID.contains("nightly")) {
  SwitchPreference(
  adapter = prefs2.autoUpdaterNightly.getAdapter(),
@@ -150,7 +164,7 @@ if (BuildConfig.APPLICATION_ID.contains("nightly")) {
  )
 }
 }
- GeneralAccentCard(accent = Color(0xFFE91E63)) {
+ GeneralAccentCard(accent = Color(0xFFE91E63), icon = Icons.Filled.Info) {
 SwitchPreference(
  adapter = liveInfoManager.enabled.getAdapter(),
  label = stringResource(id = R.string.live_information_label),
@@ -162,7 +176,7 @@ SwitchPreference(
         }
         ExpandAndShrink(visible = prefs2.enableFontSelection.asState().value) {
             PreferenceGroupHeading(heading = stringResource(id = R.string.font_label))
-            GeneralAccentCard(accent = Color(0xFF607D8B)) {
+            GeneralAccentCard(accent = Color(0xFF607D8B), icon = Icons.Filled.TextFields) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 FontPreference(
                     fontPref = prefs.fontWorkspace,
@@ -191,17 +205,17 @@ SwitchPreference(
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             if (maxWidth >= 820.dp) {
 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF2196F3)) { NavigationActionPreference(label = stringResource(id = R.string.icon_pack), destination = GeneralIconPack, subtitle = currentIconPackName) } }
-Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFFE91E63)) { NavigationActionPreference(label = stringResource(id = R.string.themed_icon_title), destination = GeneralThemedIcons, subtitle = themedIconsSubtitle) } }
-Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF7C4DFF)) { NavigationActionPreference(label = stringResource(id = R.string.icon_shape_label), destination = GeneralIconShape(ShapeRoute.APP_SHAPE), subtitle = iconShapeSubtitle, endWidget = { IconShapePreview(iconShape = iconShapeAdapter.state.value) }) } }
-Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF00BCD4)) { NavigationActionPreference(label = stringResource(id = R.string.advanced_icon_settings_title), destination = GeneralAdvancedIcons) } }
+Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF2196F3), icon = Icons.Filled.Palette) { NavigationActionPreference(label = stringResource(id = R.string.icon_pack), destination = GeneralIconPack, subtitle = currentIconPackName) } }
+Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFFE91E63), icon = Icons.Filled.Info) { NavigationActionPreference(label = stringResource(id = R.string.themed_icon_title), destination = GeneralThemedIcons, subtitle = themedIconsSubtitle) } }
+Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF7C4DFF), icon = Icons.Filled.Apps) { NavigationActionPreference(label = stringResource(id = R.string.icon_shape_label), destination = GeneralIconShape(ShapeRoute.APP_SHAPE), subtitle = iconShapeSubtitle, endWidget = { IconShapePreview(iconShape = iconShapeAdapter.state.value) }) } }
+Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.ScreenRotation) { NavigationActionPreference(label = stringResource(id = R.string.advanced_icon_settings_title), destination = GeneralAdvancedIcons) } }
 }
             } else {
 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-GeneralAccentCard(accent = Color(0xFF2196F3)) { NavigationActionPreference(label = stringResource(id = R.string.icon_pack), destination = GeneralIconPack, subtitle = currentIconPackName) }
-GeneralAccentCard(accent = Color(0xFFE91E63)) { NavigationActionPreference(label = stringResource(id = R.string.themed_icon_title), destination = GeneralThemedIcons, subtitle = themedIconsSubtitle) }
-GeneralAccentCard(accent = Color(0xFF7C4DFF)) { NavigationActionPreference(label = stringResource(id = R.string.icon_shape_label), destination = GeneralIconShape(ShapeRoute.APP_SHAPE), subtitle = iconShapeSubtitle, endWidget = { IconShapePreview(iconShape = iconShapeAdapter.state.value) }) }
-GeneralAccentCard(accent = Color(0xFF00BCD4)) { NavigationActionPreference(label = stringResource(id = R.string.advanced_icon_settings_title), destination = GeneralAdvancedIcons) }
+GeneralAccentCard(accent = Color(0xFF2196F3), icon = Icons.Filled.Palette) { NavigationActionPreference(label = stringResource(id = R.string.icon_pack), destination = GeneralIconPack, subtitle = currentIconPackName) }
+GeneralAccentCard(accent = Color(0xFFE91E63), icon = Icons.Filled.Info) { NavigationActionPreference(label = stringResource(id = R.string.themed_icon_title), destination = GeneralThemedIcons, subtitle = themedIconsSubtitle) }
+GeneralAccentCard(accent = Color(0xFF7C4DFF), icon = Icons.Filled.Apps) { NavigationActionPreference(label = stringResource(id = R.string.icon_shape_label), destination = GeneralIconShape(ShapeRoute.APP_SHAPE), subtitle = iconShapeSubtitle, endWidget = { IconShapePreview(iconShape = iconShapeAdapter.state.value) }) }
+GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.ScreenRotation) { NavigationActionPreference(label = stringResource(id = R.string.advanced_icon_settings_title), destination = GeneralAdvancedIcons) }
 }
             }
         }
@@ -215,32 +229,32 @@ GeneralAccentCard(accent = Color(0xFF00BCD4)) { NavigationActionPreference(label
             if (maxWidth >= 760.dp) {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Column(modifier = Modifier.weight(1f)) {
-                        GeneralAccentCard(accent = Color(0xFF2196F3)) { ThemePreference() }
+                        GeneralAccentCard(accent = Color(0xFF2196F3), icon = Icons.Filled.Palette) { ThemePreference() }
                     }
                     Column(modifier = Modifier.weight(1f)) {
-                        GeneralAccentCard(accent = Color(0xFFE91E63)) { ColorPreference(preference = prefs2.accentColor) }
+                        GeneralAccentCard(accent = Color(0xFFE91E63), icon = Icons.Filled.Info) { ColorPreference(preference = prefs2.accentColor) }
                     }
                     Column(modifier = Modifier.weight(1f)) {
                         ExpandAndShrink(visible = showColorStyle) {
-                            GeneralAccentCard(accent = Color(0xFF9C27B0)) {
+                            GeneralAccentCard(accent = Color(0xFF9C27B0), icon = Icons.Filled.Refresh) {
                                 ColorStylePreference(prefs2.colorStyle.getAdapter())
                             }
                         }
                     }
                     Column(modifier = Modifier.weight(1f)) {
-                        GeneralAccentCard(accent = Color(0xFF00BCD4)) { HomeWallpaperModePreference() }
+                        GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.ScreenRotation) { HomeWallpaperModePreference() }
                     }
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    GeneralAccentCard(accent = Color(0xFF2196F3)) { ThemePreference() }
-                    GeneralAccentCard(accent = Color(0xFFE91E63)) { ColorPreference(preference = prefs2.accentColor) }
+                    GeneralAccentCard(accent = Color(0xFF2196F3), icon = Icons.Filled.Palette) { ThemePreference() }
+                    GeneralAccentCard(accent = Color(0xFFE91E63), icon = Icons.Filled.Info) { ColorPreference(preference = prefs2.accentColor) }
                     ExpandAndShrink(visible = showColorStyle) {
-                        GeneralAccentCard(accent = Color(0xFF9C27B0)) {
+                        GeneralAccentCard(accent = Color(0xFF9C27B0), icon = Icons.Filled.Refresh) {
                             ColorStylePreference(prefs2.colorStyle.getAdapter())
                         }
                     }
-                    GeneralAccentCard(accent = Color(0xFF00BCD4)) { HomeWallpaperModePreference() }
+                    GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.ScreenRotation) { HomeWallpaperModePreference() }
                 }
             }
         }
@@ -373,6 +387,7 @@ private fun NotificationDotColorContrastWarnings(
 @Composable
 private fun GeneralAccentCard(
     accent: Color,
+    icon: ImageVector? = null,
     content: @Composable () -> Unit,
 ) {
     val shape = MaterialTheme.shapes.large
@@ -391,6 +406,16 @@ private fun GeneralAccentCard(
             .border(1.dp, accent.copy(alpha = 0.65f), shape)
             .padding(8.dp),
     ) {
-        content()
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = accent,
+                    modifier = Modifier.size(28.dp),
+                )
+            }
+            content()
+        }
     }
 }
