@@ -160,6 +160,10 @@ public class Hotseat extends FrameLayout implements Insettable {
         mPagedView.setLayoutParams(new LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         mIconsContainer.addView(mPagedView);
+        // Disabling the dock must also hide its icon container, not only its QSB.
+        if (!hotseatEnabled) {
+            mIconsContainer.setVisibility(View.GONE);
+        }
 
         mPageIndicatorHeight = Math.round(
                 DOCK_PAGE_INDICATOR_HEIGHT_DP * getResources().getDisplayMetrics().density);
@@ -459,15 +463,11 @@ public class Hotseat extends FrameLayout implements Insettable {
             return false;
         }
 
-        // Multi-page dock: own the icon-band stream and dispatch it to the pager so empty
-        // pages can still scroll (same pattern as single-page workspace forwarding).
+        // Let the paged view receive DOWN directly. Intercepting DOWN here
+        // prevents icon children from receiving long presses and drag gestures.
+        // The pager handles swipe interception itself when multiple pages exist.
         if (mPagedView.isPagingEnabled()) {
-            final int action = ev.getAction() & MotionEvent.ACTION_MASK;
-            if (action == MotionEvent.ACTION_DOWN) {
-                mSendTouchToPager = true;
-                mSendTouchToWorkspace = false;
-            }
-            return mSendTouchToPager;
+            return false;
         }
 
         // Single-page dock: forward horizontal swipes to workspace.
