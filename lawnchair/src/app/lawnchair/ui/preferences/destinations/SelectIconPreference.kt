@@ -70,7 +70,7 @@ fun SelectIconPreference(componentKey: ComponentKey) {
 
     PreferenceLayoutLazyColumn(label = label) {
         item {
-            ImportedIconPickerActions { filename ->
+            ImportedIconPickerActions(onImport = { filename ->
                 finishWithIcon(
                     IconPickerItem(
                         ImportedIconStore.PACKAGE_NAME,
@@ -79,7 +79,7 @@ fun SelectIconPreference(componentKey: ComponentKey) {
                         IconType.Normal,
                     ),
                 )
-            }
+            })
         }
         if (hasOverride) {
             preferenceGroupItems(1, isFirstChild = true) {
