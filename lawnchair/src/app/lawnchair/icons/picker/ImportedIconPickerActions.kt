@@ -3,6 +3,13 @@ package app.lawnchair.icons.picker
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
@@ -70,13 +77,19 @@ fun ImportedIconPickerActions(
 
     Column {
         TextButton(onClick = { gallery.launch("image/*") }, enabled = !importing) {
-            Text("Gallery")
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(Icons.Outlined.PhotoLibrary, contentDescription = null)
+                Text("Galería")
+            }
         }
         TextButton(
             onClick = { files.launch(arrayOf("image/png", "image/jpeg", "image/webp")) },
             enabled = !importing,
         ) {
-            Text("Files")
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(Icons.Outlined.FolderOpen, contentDescription = null)
+                Text("Archivos")
+            }
         }
         if (importing) Text("Importing image…")
         preview?.let { image ->
