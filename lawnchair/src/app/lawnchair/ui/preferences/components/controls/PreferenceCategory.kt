@@ -18,16 +18,17 @@ package app.lawnchair.ui.preferences.components.controls
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -56,20 +57,30 @@ fun PreferenceCategory(
             )
         },
         modifier = modifier
+            .clip(MaterialTheme.shapes.large)
             .background(
-                if (isSelected) MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp) else Color.Transparent,
+                if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
+                else MaterialTheme.colorScheme.surface,
+            )
+            .border(
+                width = if (isSelected) 1.5.dp else 0.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = if (isSelected) 0.70f else 0f),
+                shape = MaterialTheme.shapes.large,
             ),
         description = description?.let { { Text(text = description) } },
         startWidget = {
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = if (isSelected) 0.20f else 0.10f)),
             ) {
                 Icon(
                     painter = painterResource(id = iconResource),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = MaterialTheme.colorScheme.primary,
                 )
             }
         },
