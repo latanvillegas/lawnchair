@@ -293,7 +293,7 @@ android {
             java.srcDirs += ['lawnchair/tests']
         }
         androidTest {
-            java.srcDirs += ['lawnchair/src/androidTest']
+            java.srcDirs += ['lawnchair/androidTest']
         }
         main {
             res.srcDirs = ['res']
