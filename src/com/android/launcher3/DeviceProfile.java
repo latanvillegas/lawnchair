@@ -1354,7 +1354,8 @@ public class DeviceProfile {
                     mResponsiveAllAppsWidthSpec,
                     mResponsiveAllAppsHeightSpec,
                     mIconSizeSteps,
-                    isVerticalBarLayout()
+                    isVerticalBarLayout(),
+                    mTextFactors.getAllAppsIconTextSizeFactor()
             );
             updateAllAppsWithResponsiveMeasures();
         } else {
