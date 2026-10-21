@@ -158,7 +158,7 @@ object WorkspaceCompactionTransaction {
                     else item.copy(cellX = destination.x, cellY = destination.y)
                 }
                 // Never overwrite an unresolved journal from a previous operation.
-                if (WorkspaceCompactionJournal.load(appContext) != null ||
+                if (WorkspaceCompactionJournal.exists(appContext) ||
                     !WorkspaceCompactionJournal.save(
                         appContext, WorkspaceCompactionJournal.Record(before, after),
                     )
