@@ -67,6 +67,21 @@ object WorkspaceCompactionTransaction {
         target: Map<Long, WorkspaceCompactionPlanner.Position>,
     ): Boolean {
         val model = LauncherAppState.getInstance(context).model
+        if (target.isEmpty() || expected.map { it.id }.toSet().size != expected.size) return false
+        val proposed = expected.map { item ->
+            target[item.id]?.let { item.copy(cellX = it.x, cellY = it.y) } ?: item
+        }
+        if (proposed.any { it.cellX < 0 || it.cellY < 0 || it.spanX <= 0 || it.spanY <= 0 }) return false
+        // Validate complete occupancy, including the footprint of fixed widgets.
+        val occupied = HashSet<Triple<Int, Int, Int>>()
+        for (item in proposed) {
+            if (item.container != Favorites.CONTAINER_DESKTOP) continue
+            for (y in item.cellY until item.cellY + item.spanY) {
+                for (x in item.cellX until item.cellX + item.spanX) {
+                    if (!occupied.add(Triple(item.screenId, x, y))) return false
+                }
+            }
+        }
         var committed = false
         try {
             model.modelDbController.newTransaction().use { transaction ->
