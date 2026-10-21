@@ -30,6 +30,12 @@ object WorkspaceCompactionPlanner {
         val moves: List<Move>,
         val originalPositions: Map<Long, Position>,
     ) {
+        /** True only when each target has a matching reversible source. */
+        fun isReversible(): Boolean = moves.all { originalPositions[it.id] == it.from }
+
+        /** Reverse moves in reverse order for safe higher-layer undo orchestration. */
+        fun reverseMoves(): List<Move> = moves.asReversed().map { Move(it.id, it.to, it.from) }
+
         /** Coordinates to restore if a higher layer needs to undo the plan. */
         fun undoPositions(): Map<Long, Position> = originalPositions
     }
@@ -83,6 +89,6 @@ object WorkspaceCompactionPlanner {
             occupied[cursor] = true
             cursor++
         }
-        return Plan(moves, originals)
+        return Plan(moves, originals).takeIf { it.isReversible() }
     }
 }
