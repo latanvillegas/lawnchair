@@ -224,6 +224,30 @@ object WorkspaceCompactionTransaction {
     }
 
     /**
+     * Reconcile a crash after journal persistence but before the SQLite write.
+     * Never erase a committed undo receipt or an ambiguous journal.
+     * Callback runs on MODEL_EXECUTOR.
+     */
+    fun discardUnappliedJournal(context: Context, callback: (Boolean) -> Unit) {
+        if (!inFlight.compareAndSet(false, true)) {
+            callback(false)
+            return
+        }
+        val appContext = context.applicationContext
+        Executors.MODEL_EXECUTOR.execute {
+            try {
+                val cleared = recoveryState(appContext) == RecoveryState.BEFORE_WRITE &&
+                    WorkspaceCompactionJournal.clear(appContext)
+                callback(cleared)
+            } catch (_: Exception) {
+                callback(false)
+            } finally {
+                inFlight.set(false)
+            }
+        }
+    }
+
+    /**
      * Returns a durable undo receipt only when the database still exactly
      * matches the journal's post-compaction state. The caller must run this
      * on MODEL_EXECUTOR. An ambiguous or partially applied journal is refused.
