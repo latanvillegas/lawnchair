@@ -1240,10 +1240,7 @@ public class DeviceProfile {
             cellHeightPx = mResponsiveWorkspaceHeightSpec.getCellSizePx();
             maxIconTextLineCount = mResponsiveWorkspaceCellSpec.getIconTextMaxLineCount();
 
-            if (cellWidthPx < iconSizePx) {
-                // get a smaller icon size
-                iconSizePx = mIconSizeSteps.getIconSmallerThan(cellWidthPx);
-            }
+            // Preserve the requested icon size in responsive grids.
 
             if (isVerticalLayout) {
                 iconDrawablePaddingPx = 0;
@@ -1259,7 +1256,7 @@ public class DeviceProfile {
                     maxIconTextLineCount);
             int cellContentHeight = cellContentDimensions.resizeToFitCellHeight(cellHeightPx,
                     mIconSizeSteps);
-            iconSizePx = cellContentDimensions.getIconSizePx();
+            // Preserve requested icon size; keep fitted padding and text metrics.
             iconDrawablePaddingPx = cellContentDimensions.getIconDrawablePaddingPx();
             iconTextSizePx = cellContentDimensions.getIconTextSizePx();
             maxIconTextLineCount = cellContentDimensions.getMaxLineCount();
@@ -1321,7 +1318,7 @@ public class DeviceProfile {
                         // then proportional reduce iconSizePx and iconTextSizePx to fit.
                         iconDrawablePaddingPx = 0;
                         float ratio = cellHeightPx / (float) cellContentWithoutPadding;
-                        iconSizePx = (int) (iconSizePx * ratio);
+                        // Preserve icon size, but shrink labels to limit collisions.
                         iconTextSizePx = (int) (iconTextSizePx * ratio);
                     }
                     cellTextAndPaddingHeight =
