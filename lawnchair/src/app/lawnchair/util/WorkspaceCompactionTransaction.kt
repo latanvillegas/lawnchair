@@ -168,8 +168,15 @@ object WorkspaceCompactionTransaction {
             committed = true
         } catch (_: Exception) {
             return false
-        } finally {
-            if (committed) model.forceReload()
+        }
+        // A failed model refresh must not change the result of a committed
+        // SQLite transaction. The durable journal remains available for recovery.
+        if (committed) {
+            try {
+                model.forceReload()
+            } catch (_: Exception) {
+                // Database is already committed; never report a SQL rollback.
+            }
         }
         return committed
     }
