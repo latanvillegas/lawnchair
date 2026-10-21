@@ -16,8 +16,11 @@
 
 package app.lawnchair.ui.preferences.components.layout
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ListItemShapes
@@ -31,6 +34,8 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 
 /***
  * A template used to create most preference-related components in the Preference UI.
@@ -48,8 +53,8 @@ fun PreferenceTemplate(
     shapes: ListItemShapes = ListItemDefaults.shapes(),
     onClick: (() -> Unit)? = null,
     colors: ListItemColors = ListItemDefaults.segmentedColors(
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        disabledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+        containerColor = MaterialTheme.colorScheme.surface,
+        disabledContainerColor = MaterialTheme.colorScheme.surface,
         supportingContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
     ),
     interactionSource: MutableInteractionSource? = null,
@@ -68,7 +73,17 @@ fun PreferenceTemplate(
         }
     }
 
-    Column(modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.large)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                shape = MaterialTheme.shapes.large,
+            )
+            .padding(vertical = 2.dp),
+    ) {
         if (onClick == null) {
             SegmentedListItem(
                 content = titleContent,
