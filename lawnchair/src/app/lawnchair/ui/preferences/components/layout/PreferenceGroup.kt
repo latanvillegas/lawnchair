@@ -16,8 +16,8 @@
 
 package app.lawnchair.ui.preferences.components.layout
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -31,7 +31,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -58,10 +57,10 @@ fun PreferenceGroup(
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.large)
-                .background(Color.Black)
+                .background(MaterialTheme.colorScheme.surface)
                 .border(
                     width = 1.dp,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.32f),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f),
                     shape = MaterialTheme.shapes.large,
                 )
                 .padding(vertical = 6.dp),
