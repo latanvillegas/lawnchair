@@ -299,13 +299,19 @@ GeneralAccentCard(accent = Color(0xFF00BCD4), icon = Icons.Filled.ScreenRotation
 
         // On tablets, offer a real, immediately applicable accent palette.
         PreferenceGroupHeading(heading = stringResource(id = R.string.color_style_label))
-        Row(
+        androidx.compose.foundation.layout.FlowRow(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             val selectedAccent = prefs2.accentColor.getAdapter()
             val palette = listOf(
                 ColorOption.PureCyan to Color(0xFF00FFFF),
+                ColorOption.PureMagenta to Color(0xFFFF00FF),
+                ColorOption.PureGreen to Color(0xFF00FF00),
+                ColorOption.PureYellow to Color(0xFFFFFF00),
+                ColorOption.PureBlue to Color(0xFF0000FF),
+                ColorOption.PureRed to Color(0xFFFF0000),
             )
             palette.forEach { (option, swatch) ->
                 Box(
