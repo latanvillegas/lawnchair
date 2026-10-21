@@ -60,6 +60,7 @@ import app.lawnchair.ui.preferences.components.controls.SwitchPreference
 import app.lawnchair.ui.preferences.components.controls.WarningPreference
 import app.lawnchair.ui.preferences.components.layout.ExpandAndShrink
 import app.lawnchair.ui.preferences.components.layout.PreferenceGroup
+import app.lawnchair.ui.preferences.components.layout.PreferenceGroupHeading
 import app.lawnchair.ui.preferences.components.layout.PreferenceLayout
 import app.lawnchair.ui.preferences.components.notificationDotsEnabled
 import app.lawnchair.ui.preferences.components.notificationServiceEnabled
@@ -184,32 +185,23 @@ SwitchPreference(
             }
         }
 
-        PreferenceGroup(
-            modifier = Modifier,
-            heading = stringResource(id = R.string.icons),
-        ) {
-            NavigationActionPreference(
-                label = stringResource(id = R.string.icon_pack),
-                destination = GeneralIconPack,
-                subtitle = currentIconPackName,
-            )
-            NavigationActionPreference(
-                label = stringResource(id = R.string.themed_icon_title),
-                destination = GeneralThemedIcons,
-                subtitle = themedIconsSubtitle,
-            )
-            NavigationActionPreference(
-                label = stringResource(id = R.string.icon_shape_label),
-                destination = GeneralIconShape(ShapeRoute.APP_SHAPE),
-                subtitle = iconShapeSubtitle,
-                endWidget = {
-                    IconShapePreview(iconShape = iconShapeAdapter.state.value)
-                },
-            )
-            NavigationActionPreference(
-                label = stringResource(id = R.string.advanced_icon_settings_title),
-                destination = GeneralAdvancedIcons,
-            )
+        PreferenceGroupHeading(heading = stringResource(id = R.string.icons))
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            if (maxWidth >= 820.dp) {
+Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF2196F3)) { NavigationActionPreference(label = stringResource(id = R.string.icon_pack), destination = GeneralIconPack, subtitle = currentIconPackName) } }
+Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFFE91E63)) { NavigationActionPreference(label = stringResource(id = R.string.themed_icon_title), destination = GeneralThemedIcons, subtitle = themedIconsSubtitle) } }
+Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF7C4DFF)) { NavigationActionPreference(label = stringResource(id = R.string.icon_shape_label), destination = GeneralIconShape(ShapeRoute.APP_SHAPE), subtitle = iconShapeSubtitle, endWidget = { IconShapePreview(iconShape = iconShapeAdapter.state.value) }) } }
+Column(modifier = Modifier.weight(1f)) { GeneralAccentCard(accent = Color(0xFF00BCD4)) { NavigationActionPreference(label = stringResource(id = R.string.advanced_icon_settings_title), destination = GeneralAdvancedIcons) } }
+}
+            } else {
+Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+GeneralAccentCard(accent = Color(0xFF2196F3)) { NavigationActionPreference(label = stringResource(id = R.string.icon_pack), destination = GeneralIconPack, subtitle = currentIconPackName) }
+GeneralAccentCard(accent = Color(0xFFE91E63)) { NavigationActionPreference(label = stringResource(id = R.string.themed_icon_title), destination = GeneralThemedIcons, subtitle = themedIconsSubtitle) }
+GeneralAccentCard(accent = Color(0xFF7C4DFF)) { NavigationActionPreference(label = stringResource(id = R.string.icon_shape_label), destination = GeneralIconShape(ShapeRoute.APP_SHAPE), subtitle = iconShapeSubtitle, endWidget = { IconShapePreview(iconShape = iconShapeAdapter.state.value) }) }
+GeneralAccentCard(accent = Color(0xFF00BCD4)) { NavigationActionPreference(label = stringResource(id = R.string.advanced_icon_settings_title), destination = GeneralAdvancedIcons) }
+}
+            }
         }
 
         val accentColorAdapter = prefs2.accentColor.getAdapter()
