@@ -38,4 +38,22 @@ shell 'cmd overlay list' \
   | grep -i -E 'navbar|navigation|gesture|threebutton' \
   | head -30 || true
 
+
+echo "=== FRAMEWORK RECENTS RESOURCE (READ ONLY) ==="
+# Android framework resource ID is OEM/version-dependent; avoid guessing numeric IDs.
+# SystemUI's mRecentsComponentName above is the authoritative runtime observation.
+
+echo "=== LAUNCHER AND SYSTEMUI PACKAGE FLAGS ==="
+shell 'dumpsys package app.lawnchair.nightly' \
+  | grep -i -E 'pkgFlags=|privateFlags=|STATUS_BAR_SERVICE|WRITE_SECURE_SETTINGS|MANAGE_ACTIVITY_TASKS' \
+  | head -35 || true
+
+echo "=== OVERVIEW PROXY BINDING ==="
+shell 'dumpsys activity services' \
+  | grep -i -E 'com.miui.home/.recents.TouchInteractionService|app.lawnchair.nightly/com.android.quickstep.TouchInteractionService' \
+  | head -30 || true
+
+echo "=== SAFETY NOTE ==="
+echo "This report does not enable gestures, grant permissions, or change SystemUI."
+
 echo "=== END: NO SETTINGS WERE CHANGED ==="
