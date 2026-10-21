@@ -18,8 +18,8 @@ import android.content.pm.ComponentInfo
 import android.content.pm.LauncherApps
 import android.content.pm.PackageItemInfo
 import android.content.res.Resources
-import android.graphics.drawable.Drawable
 import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.UserHandle
 import android.os.UserManager
@@ -30,9 +30,9 @@ import androidx.core.graphics.drawable.toDrawable
 import app.lawnchair.data.iconoverride.IconOverrideRepository
 import app.lawnchair.icons.iconpack.IconPack
 import app.lawnchair.icons.iconpack.IconPackProvider
-import app.lawnchair.icons.picker.ImportedIconStore
 import app.lawnchair.icons.picker.IconEntry
 import app.lawnchair.icons.picker.IconType
+import app.lawnchair.icons.picker.ImportedIconStore
 import app.lawnchair.preferences.PreferenceManager
 import app.lawnchair.util.MultiSafeCloseable
 import app.lawnchair.util.isPackageInstalled
