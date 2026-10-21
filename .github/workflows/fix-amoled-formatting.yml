@@ -1,0 +1,53 @@
+name: Fix AMOLED Kotlin formatting
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/amoled-pure-colors
+    paths:
+      - '.github/workflows/fix-amoled-formatting.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/amoled-pure-colors
+          submodules: true
+          persist-credentials: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Apply Spotless formatting
+        run: ./gradlew spotlessApply
+      - name: Commit only identified Kotlin files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- \
+            lawnchair/src/app/lawnchair/icons/picker/ImportedIconStore.kt \
+            lawnchair/src/app/lawnchair/theme/ThemeProvider.kt \
+            lawnchair/src/app/lawnchair/theme/color/ColorOption.kt \
+            lawnchair/src/app/lawnchair/theme/color/tokens/ColorToken.kt \
+            lawnchair/src/app/lawnchair/ui/preferences/components/controls/ListPreference.kt \
+            lawnchair/src/app/lawnchair/ui/preferences/components/controls/MainSwitchPreference.kt \
+            lawnchair/src/app/lawnchair/ui/preferences/components/controls/PreferenceCategory.kt \
+            lawnchair/src/app/lawnchair/ui/preferences/components/controls/SliderPreference.kt \
+            lawnchair/src/app/lawnchair/ui/preferences/components/controls/SwitchPreference.kt \
+            lawnchair/src/app/lawnchair/ui/preferences/destinations/GeneralPreferences.kt \
+            lawnchair/src/app/lawnchair/ui/theme/Theme.kt
+          if git diff --cached --quiet; then
+            echo 'No formatting changes in the 11 selected files.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Apply Spotless formatting to 11 AMOLED Kotlin files'
+          git push origin HEAD:feature/amoled-pure-colors
