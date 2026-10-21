@@ -227,7 +227,12 @@ private fun getAllAppsBaseColor(context: Context, defaultColor: Int): Int {
     // System/default drawer backgrounds must follow the launcher light/dark mode,
     // not the Material You accent or wallpaper color.
     val nightMode = context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
-    val isDark = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+    val systemDark = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+    val isDark = when (PreferenceManager.getInstance(context).launcherTheme.get().lowercase()) {
+        "dark" -> true
+        "light" -> false
+        else -> systemDark
+    }
     val baseColor = when (colorOptions) {
         ColorOption.SystemAccent, ColorOption.Default -> if (isDark) android.graphics.Color.BLACK else android.graphics.Color.WHITE
         else -> colorOptions.colorPreferenceEntry.lightColor.invoke(context).takeIf { it != 0 } ?: defaultColor
