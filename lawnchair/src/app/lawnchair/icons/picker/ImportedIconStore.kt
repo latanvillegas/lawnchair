@@ -17,6 +17,7 @@ import java.util.UUID
  * or strips an existing alpha channel. Rendering can request a target size separately.
  */
 object ImportedIconStore {
+    const val PACKAGE_NAME = "app.lawnchair.imported.icons"
     private const val DIRECTORY = "custom_icons"
     private const val MAX_BYTES = 32L * 1024L * 1024L
 
