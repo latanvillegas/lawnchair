@@ -928,7 +928,9 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         final boolean drawerIcon = mDisplay == DISPLAY_ALL_APPS
                 || mDisplay == DISPLAY_PREDICTION_ROW
                 || mDisplay == DISPLAY_DRAWER_FOLDER;
-        final boolean homeIcon = mDisplay == DISPLAY_WORKSPACE;
+        final boolean homeIcon = mDisplay == DISPLAY_WORKSPACE
+                || mDisplay == DISPLAY_FOLDER
+                || mDisplay == DISPLAY_TASKBAR;
         float brightness = 1f;
         if (drawerIcon) {
             brightness = PreferenceCacheExtensionsKt.firstCached(pref2.getDrawerIconBrightness());
