@@ -1,0 +1,42 @@
+name: AMOLED Cards validation
+
+on:
+  push:
+    branches:
+      - feature/amoled-pure-colors
+    paths:
+      - 'lawnchair/src/app/lawnchair/ui/preferences/**'
+      - '.github/workflows/amoled-cards-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Verify Kotlin formatting without changing source
+        run: ./gradlew spotlessCheck
+
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Compile launcher Kotlin and Compose
+        run: ./gradlew compileLawnWithQuickstepNightlyReleaseKotlin
