@@ -93,7 +93,6 @@ fun AppDrawerPreferences(
                     ListPreferenceEntry(value = "recent", label = { "Instaladas recientemente" }),
                 ),
                 label = "Ordenar aplicaciones",
-                description = "Selecciona cómo se muestran las aplicaciones del cajón",
             )
         }
         PreferenceGroup(heading = stringResource(id = R.string.general_label)) {
