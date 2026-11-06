@@ -189,6 +189,13 @@ fun AppDrawerPreferences(
                 valueRange = 0.5F..1.5F,
                 showAsPercentage = true,
             )
+            SliderPreference(
+                label = stringResource(id = R.string.icon_brightness_label),
+                adapter = prefs2.drawerIconBrightness.getAdapter(),
+                step = 0.05f,
+                valueRange = 0f..1f,
+                showAsPercentage = true,
+            )
             SwitchPreference(
                 adapter = showDrawerLabels,
                 label = stringResource(id = R.string.show_labels),
