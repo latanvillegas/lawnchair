@@ -18,6 +18,7 @@ import android.content.pm.ComponentInfo
 import android.content.pm.LauncherApps
 import android.content.pm.PackageItemInfo
 import android.content.res.Resources
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.os.UserHandle
@@ -31,6 +32,7 @@ import app.lawnchair.icons.iconpack.IconPack
 import app.lawnchair.icons.iconpack.IconPackProvider
 import app.lawnchair.icons.picker.IconEntry
 import app.lawnchair.icons.picker.IconType
+import app.lawnchair.icons.picker.ImportedIconStore
 import app.lawnchair.preferences.PreferenceManager
 import app.lawnchair.util.MultiSafeCloseable
 import app.lawnchair.util.isPackageInstalled
@@ -147,6 +149,21 @@ class LawnchairIconProvider @Inject constructor(
         val packageName = appInfo.packageName
         val user = UserHandle.getUserHandleForUid(appInfo.uid)
         val componentName = resolveComponentName(info, appInfo, user)
+
+        // A user-imported icon is an explicit per-app override. Load its persisted copy
+        // before trying icon packs or monochrome themes; fall back if the file is missing.
+        if (componentName != null) {
+            val overrideItem = overrideRepo.overridesMap[ComponentKey(componentName, user)]
+            if (overrideItem?.packPackageName == ImportedIconStore.PACKAGE_NAME) {
+                try {
+                    val targetPixels = (192f * iconDpi.coerceAtLeast(160) / 160f).toInt()
+                    val bitmap = ImportedIconStore.decode(context, overrideItem.drawableName, targetPixels)
+                    return BitmapDrawable(context.resources, bitmap)
+                } catch (exception: Exception) {
+                    Log.w(TAG, "Unable to load imported icon for $componentName", exception)
+                }
+            }
+        }
 
         var iconEntry: IconEntry? = null
         if (componentName != null) {
