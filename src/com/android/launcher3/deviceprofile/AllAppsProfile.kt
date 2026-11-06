@@ -32,6 +32,7 @@ import com.android.launcher3.util.CellContentDimensions
 import com.android.launcher3.util.IconSizeSteps
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 data class AllAppsProfile(
     val borderSpacePx: Point,
@@ -176,9 +177,15 @@ data class AllAppsProfile(
             responsiveAllAppsWidthSpec: CalculatedResponsiveSpec,
             responsiveAllAppsHeightSpec: CalculatedResponsiveSpec,
             iconSizeSteps: IconSizeSteps,
+            iconSizeFactor: Float,
             isVerticalBarLayout: Boolean,
         ): AllAppsProfile {
-            var allAppsIconSizePx = responsiveAllAppsCellSpec.iconSize
+            // Responsive specs are independent of the IDP sizes. Apply the drawer's
+            // user factor here, then resize to the measured cell width and height.
+            val safeFactor =
+                if (iconSizeFactor.isFinite()) iconSizeFactor.coerceIn(0.5f, 2.5f) else 1f
+            var allAppsIconSizePx =
+                max(1, (responsiveAllAppsCellSpec.iconSize * safeFactor).roundToInt())
             var allAppsIconTextSizePx: Float = responsiveAllAppsCellSpec.iconTextSize.toFloat()
             var allAppsIconDrawablePaddingPx =
                 getNormalizedIconDrawablePadding(
@@ -194,7 +201,7 @@ data class AllAppsProfile(
             // Reduce the size of the app icon if it doesn't fit
             if (allAppsCellWidthPx < allAppsIconSizePx) {
                 // get a smaller icon size
-                allAppsIconSizePx = iconSizeSteps.getIconSmallerThan(allAppsCellWidthPx)
+                allAppsIconSizePx = min(allAppsCellWidthPx, iconSizeSteps.getIconSmallerThan(allAppsCellWidthPx))
             }
 
             val cellContentDimensions =
@@ -262,6 +269,7 @@ data class AllAppsProfile(
             iconSizePx: Int,
             iconDrawablePaddingOriginalPx: Int,
             cellHeightMultiplier: Float = 1f,
+            availableWidthPx: Int,
         ) =
             when {
                 isScalableGrid -> {
@@ -280,6 +288,7 @@ data class AllAppsProfile(
                     createAllAppsProfileNonScalable(
                         res, inv, metric, typeIndex, scale,
                         cellHeightMultiplier = cellHeightMultiplier,
+                        availableWidthPx = availableWidthPx,
                     )
                 }
             }
