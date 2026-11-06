@@ -58,44 +58,44 @@ object ColorTokens {
 
     @JvmField val SearchResultSmallIcon = DayNightColorToken(Accent1_100, Accent2_800)
 
-    @JvmField val SurfaceContainerHighest = DayNightColorToken(Neutral1_500.setLStar(90.0), Neutral1_500.setLStar(22.0))
+    @JvmField val SurfaceContainerHighest = DayNightColorToken(StaticColorToken(0xFFFFFFFF), StaticColorToken(0xFF000000))
 
-    @JvmField val SurfaceContainerLow = DayNightColorToken(Neutral1_500.setLStar(96.0), Neutral1_500.setLStar(10.0))
+    @JvmField val SurfaceContainerLow = DayNightColorToken(StaticColorToken(0xFFFFFFFF), StaticColorToken(0xFF000000))
 
     val Scrim = Neutral1_0
     val Shadow = Neutral1_0
 
-    val SurfaceLight = Neutral1_500.setLStar(98.0)
-    val SurfaceDark = Neutral1_500.setLStar(6.0)
+    val SurfaceLight = StaticColorToken(0xFFFFFFFF)
+    val SurfaceDark = StaticColorToken(0xFF000000)
 
     @JvmField val Surface = DayNightColorToken(SurfaceLight, SurfaceDark)
 
-    val SurfaceVariantLight = Neutral2_100
-    val SurfaceVariantDark = Neutral1_700
+    val SurfaceVariantLight = SurfaceLight
+    val SurfaceVariantDark = SurfaceDark
 
-    @JvmField val SurfaceDimColor = DayNightColorToken(Neutral2_600.setLStar(87.0), Neutral2_600.setLStar(6.0))
+    @JvmField val SurfaceDimColor = DayNightColorToken(SurfaceLight, SurfaceDark)
 
-    @JvmField val SurfaceBrightColor = DayNightColorToken(Neutral2_600.setLStar(98.0), Neutral2_600.setLStar(24.0))
+    @JvmField val SurfaceBrightColor = DayNightColorToken(SurfaceLight, SurfaceDark)
 
     @JvmField val ColorAccent = DayNightColorToken(Accent1_600, Accent1_100)
 
-    @JvmField val ColorBackground = DayNightColorToken(Neutral1_50, Neutral1_900)
+    @JvmField val ColorBackground = DayNightColorToken(SurfaceLight, SurfaceDark)
 
-    @JvmField val ColorBackgroundFloating = DayNightColorToken(Neutral2_50, Neutral2_900)
+    @JvmField val ColorBackgroundFloating = DayNightColorToken(SurfaceLight, SurfaceDark)
 
-    @JvmField val ColorPrimary = DayNightColorToken(Neutral1_50, Neutral1_900)
+    @JvmField val ColorPrimary = DayNightColorToken(SurfaceLight, SurfaceDark)
 
     @JvmField val TextColorPrimary = DayNightColorToken(Neutral1_900, Neutral1_50)
 
     @JvmField val TextColorPrimaryInverse = TextColorPrimary.inverse()
 
-    @JvmField val TextColorSecondary = DayNightColorToken(StaticColorToken(0xde000000), Neutral2_200)
+    @JvmField val TextColorSecondary = DayNightColorToken(StaticColorToken(0xDE000000), Neutral2_200)
 
     @JvmField val AllAppsHeaderProtectionColor = DayNightColorToken(SurfaceContainerHighest, SurfaceContainerLow)
 
     @JvmField val AllAppsScrimColor = StaticColorToken(0x404040).setAlpha(.40f)
 
-    @JvmField val AllAppsTabBackground = DayNightColorToken(Neutral1_100, Neutral1_800.setLStar(22.0))
+    @JvmField val AllAppsTabBackground = DayNightColorToken(SurfaceLight, SurfaceDark)
 
     @JvmField val AllAppsTabBackgroundSelected = DayNightColorToken(Accent1_600, Accent1_200)
 
@@ -110,7 +110,7 @@ object ColorTokens {
 
     @JvmField val GroupHighlightBlur = Surface.setAlpha(0.54f)
 
-    @JvmField val OverviewScrimColor = DayNightColorToken(Neutral2_100.setLStar(87.0), Neutral1_800)
+    @JvmField val OverviewScrimColor = DayNightColorToken(SurfaceLight, SurfaceDark)
 
     @JvmField val OverviewScrimOverBlurColor = DayNightColorToken(
         StaticColorToken(0x80FFFFFF),
@@ -131,13 +131,13 @@ object ColorTokens {
             if (translucent) setAlpha(translucentIntensity) else this
         }
 
-    @JvmField val SearchboxHighlight = DayNightColorToken(Neutral2_600.setLStar(98.0), Neutral1_800)
+    @JvmField val SearchboxHighlight = DayNightColorToken(SurfaceLight, SurfaceDark)
 
     @JvmField val SearchboxHighlightBlur = SearchboxHighlight.setAlpha(.54f)
 
     @JvmField val DotColor = Accent3_200
 
-    @JvmField val FolderBackgroundColor = DayNightColorToken(Neutral1_50.setLStar(94.0), Neutral2_900.setLStar(12.0))
+    @JvmField val FolderBackgroundColor = DayNightColorToken(SurfaceLight, SurfaceDark)
 
     @JvmField val FolderIconBorderColor = StaticColorToken(0xFFF5F5F5) // Material Grey 100
 
@@ -145,17 +145,17 @@ object ColorTokens {
 
     @JvmField val FolderPreviewColor = DayNightColorToken(Accent2_200, Neutral1_900.setLStar(12.0))
 
-    @JvmField val PopupColorPrimary = DayNightColorToken(Accent2_50, Neutral2_800)
+    @JvmField val PopupColorPrimary = DayNightColorToken(SurfaceLight, SurfaceDark)
 
-    @JvmField val PopupColorSecondary = DayNightColorToken(Neutral2_100, Neutral1_900)
+    @JvmField val PopupColorSecondary = DayNightColorToken(SurfaceLight, SurfaceDark)
 
-    @JvmField val PopupColorTertiary = DayNightColorToken(Neutral2_300, Neutral2_700)
+    @JvmField val PopupColorTertiary = DayNightColorToken(SurfaceLight, SurfaceDark)
 
-    @JvmField val PopupShadeFirst = DayNightColorToken(PopupColorPrimary.setLStar(98.0), PopupColorPrimary.setLStar(20.0))
+    @JvmField val PopupShadeFirst = PopupColorPrimary
 
-    @JvmField val PopupShadeSecond = DayNightColorToken(PopupColorPrimary.setLStar(95.0), PopupColorPrimary.setLStar(15.0))
+    @JvmField val PopupShadeSecond = PopupColorPrimary
 
-    @JvmField val PopupShadeThird = DayNightColorToken(PopupColorPrimary.setLStar(90.0), PopupColorPrimary.setLStar(10.0))
+    @JvmField val PopupShadeThird = PopupColorPrimary
 
     @JvmField val PopupArrow = PopupShadeFirst
 
@@ -177,7 +177,7 @@ object ColorTokens {
 
     @JvmField val DropTargetHoverTextColor = DarkTextColorToken(Accent1_900, Accent1_100)
 
-    @JvmField val WidgetListRowColor = DayNightColorToken(Neutral1_10, Neutral2_800)
+    @JvmField val WidgetListRowColor = DayNightColorToken(SurfaceLight, SurfaceDark)
 
     @JvmField val PrimaryButton = DayNightColorToken(Accent1_600, Accent1_200)
 
@@ -195,7 +195,7 @@ object ColorTokens {
     // Material 3 Expressive
     @JvmField val ExpressiveAllApps = DayNightColorToken(Accent1_100, Accent1_800).setAlpha(0.5f)
 
-    @JvmField val BottomSheetBackgroundColorBlurFallback = DayNightColorToken(Accent2_200, Accent2_800)
+    @JvmField val BottomSheetBackgroundColorBlurFallback = DayNightColorToken(SurfaceLight, SurfaceDark)
 
     @JvmField val shade_panel_fg_color = DayNightColorToken(
         Accent1_100.setAlpha(0.32f),
