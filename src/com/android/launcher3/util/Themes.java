@@ -30,6 +30,7 @@ import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 
 import androidx.annotation.ColorInt;
+import androidx.core.graphics.ColorUtils;
 
 import com.android.launcher3.R;
 import com.android.launcher3.Utilities;
@@ -54,7 +55,13 @@ public class Themes {
     /** Gets the WallpaperColorHints and then uses those to get the correct activity theme res. */
     public static int getActivityThemeRes(Context context) {
         WallpaperColorsCompat colors = WallpaperManagerCompat.INSTANCE.get(context).getWallpaperColors();
-        final int colorHints = colors != null ? colors.getColorHints() : 0;
+        int colorHints = colors != null ? colors.getColorHints() : 0;
+        // Some wallpapers omit the dark-text hint despite being nearly white.
+        // Fall back to the primary wallpaper color so workspace labels remain readable.
+        if ((colorHints & HINT_SUPPORTS_DARK_TEXT) == 0 && colors != null
+                && ColorUtils.calculateLuminance(colors.getPrimaryColor()) >= 0.7) {
+            colorHints |= HINT_SUPPORTS_DARK_TEXT;
+        }
         return getActivityThemeRes(context, colorHints);
     }
 
