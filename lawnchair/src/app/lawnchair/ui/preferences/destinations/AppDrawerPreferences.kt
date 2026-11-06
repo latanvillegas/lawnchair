@@ -43,6 +43,8 @@ import app.lawnchair.ui.preferences.LocalIsExpandedScreen
 import app.lawnchair.ui.preferences.components.AppDrawerHapticFeedbackPreference
 import app.lawnchair.ui.preferences.components.NavigationActionPreference
 import app.lawnchair.ui.preferences.components.colorpreference.ColorPreference
+import app.lawnchair.ui.preferences.components.controls.ListPreference
+import app.lawnchair.ui.preferences.components.controls.ListPreferenceEntry
 import app.lawnchair.ui.preferences.components.controls.SliderPreference
 import app.lawnchair.ui.preferences.components.controls.SwitchPreference
 import app.lawnchair.ui.preferences.components.controls.SwitchPreferenceWithPreview
@@ -82,6 +84,17 @@ fun AppDrawerPreferences(
             }
         }
         val hiddenApps = prefs2.hiddenApps.getAdapter().state.value
+        PreferenceGroup(heading = stringResource(id = R.string.drawer_sort_heading)) {
+            ListPreference(
+                adapter = prefs.drawerSortMode.getAdapter(),
+                entries = listOf(
+                    ListPreferenceEntry(value = "default", label = { stringResource(R.string.drawer_sort_az) }),
+                    ListPreferenceEntry(value = "za", label = { stringResource(R.string.drawer_sort_za) }),
+                    ListPreferenceEntry(value = "recent", label = { stringResource(R.string.drawer_sort_recent) }),
+                ),
+                label = stringResource(R.string.drawer_sort_label),
+            )
+        }
         PreferenceGroup(heading = stringResource(id = R.string.general_label)) {
             NavigationActionPreference(
                 label = stringResource(id = R.string.hidden_apps_label),
