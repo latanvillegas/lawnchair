@@ -1352,11 +1352,26 @@ public class DeviceProfile {
             desiredWorkspaceHorizontalMarginPx =
                     (int) (desiredWorkspaceHorizontalMarginOriginalPx * scale);
         } else {
+            // Non-scalable grids have fixed physical cells. Clamp the requested
+            // icon to both dimensions rather than drawing outside adjacent
+            // cells at 200-250% (especially on small landscape windows).
+            final Point availableCell = getCellSize();
+            final int labelHeightPx = Utilities.calculateTextHeight(iconTextSizePx);
+            final int maxIconWidthPx = Math.max(1, availableCell.x);
+            final int maxIconHeightPx = Math.max(1, (int) Math.floor(
+                    Math.max(1, availableCell.y - labelHeightPx) / ICON_OVERLAP_FACTOR));
+            iconSizePx = Math.min(iconSizePx, Math.min(maxIconWidthPx, maxIconHeightPx));
+
             iconDrawablePaddingPx = (int) (getNormalizedIconDrawablePadding() * iconScale);
+            final int freeCellHeightPx = availableCell.y
+                    - getIconSizeWithOverlap(iconSizePx) - labelHeightPx;
+            final int freeCellWidthPx = availableCell.x - iconSizePx;
+            iconDrawablePaddingPx = Math.max(0, Math.min(iconDrawablePaddingPx,
+                    Math.min(freeCellWidthPx, freeCellHeightPx)));
+
             cellWidthPx = iconSizePx + iconDrawablePaddingPx;
             cellHeightPx = getIconSizeWithOverlap(iconSizePx)
-                    + iconDrawablePaddingPx
-                    + Utilities.calculateTextHeight(iconTextSizePx);
+                    + iconDrawablePaddingPx + labelHeightPx;
             maxIconTextLineCount = 1;
             int cellPaddingY = Math.max(0, (getCellSize().y - cellHeightPx) / 2);
             if (iconDrawablePaddingPx > cellPaddingY && !isVerticalLayout
