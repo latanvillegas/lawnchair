@@ -38,6 +38,9 @@
     </style>
 
     <style name="LauncherTheme" parent="@style/DynamicColorsBaseLauncherTheme">
+        <!-- Draw the actual drawer color behind three-button navigation, without
+             Android's opaque contrast scrim turning AMOLED black into gray. -->
+        <item name="android:enforceNavigationBarContrast">false</item>
         <item name="android:textColorSecondary">#DE000000</item>
         <item name="groupHighlight">@color/materialColorSurfaceContainerHigh</item>
         <item name="allAppsScrimColor">@color/materialColorSurfaceDim</item>
