@@ -44,7 +44,11 @@ class IconSizeSteps(res: Resources) {
     }
 
     private fun getIndexForIconSize(iconSizePx: Int): Int {
-        return max(0, steps.indexOfFirst { iconSizePx <= it })
+        // A user can request icons larger than the biggest resource-defined step.
+        // Treat that as an index beyond the final step, rather than wrapping to
+        // index zero and unexpectedly shrinking the icon to its minimum size.
+        val index = steps.indexOfFirst { iconSizePx <= it }
+        return if (index == -1) steps.size else index
     }
 
     companion object {

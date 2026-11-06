@@ -32,6 +32,7 @@ import com.android.launcher3.util.CellContentDimensions
 import com.android.launcher3.util.IconSizeSteps
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 data class AllAppsProfile(
     val borderSpacePx: Point,
@@ -135,16 +136,31 @@ data class AllAppsProfile(
             typeIndex: Int,
             scale: Float,
             cellHeightMultiplier: Float = 1f,
+            availableWidthPx: Int,
         ): AllAppsProfile {
             val allAppsBorderSpacePx = calculateAllAppsBorderSpacePx(inv, metric, typeIndex, scale)
-            val allAppsIconSizePx = max(1, pxFromDp(inv.allAppsIconSize[typeIndex], metric, scale))
-            val allAppsIconDrawablePaddingPx =
-                res.getDimensionPixelSize(R.dimen.all_apps_icon_drawable_padding)
+            // The number of columns can be set as high as ten even on narrow phones.
+            // Bound icon padding as well as the bitmap so every row fits its real width.
+            val columnWidthBudget = max(1, availableWidthPx / max(1, inv.numAllAppsColumns))
+            val allAppsIconDrawablePaddingPx = min(
+                max(0, res.getDimensionPixelSize(R.dimen.all_apps_icon_drawable_padding)),
+                max(0, (columnWidthBudget - 1) / 2),
+            )
+            // In non-scalable grids the drawer scrolls vertically, so rows may expand.
+            val iconWidthBudget = max(1, columnWidthBudget - 2 * allAppsIconDrawablePaddingPx)
+            val allAppsIconSizePx = min(
+                max(1, pxFromDp(inv.allAppsIconSize[typeIndex], metric, scale)),
+                iconWidthBudget,
+            )
+            val textSizePx = pxFromSp(inv.allAppsIconTextSize[typeIndex], metric) * scale
             return AllAppsProfile(
                 borderSpacePx = allAppsBorderSpacePx,
-                cellHeightPx =
-                    (pxFromDp(inv.allAppsCellSize.get(typeIndex).y, metric, cellHeightMultiplier) +
-                        allAppsBorderSpacePx.y),
+                cellHeightPx = max(
+                    pxFromDp(inv.allAppsCellSize.get(typeIndex).y, metric, cellHeightMultiplier) +
+                        allAppsBorderSpacePx.y,
+                    allAppsIconSizePx + allAppsIconDrawablePaddingPx +
+                        Utilities.calculateTextHeight(textSizePx) * 2,
+                ),
                 iconSizePx = allAppsIconSizePx,
                 iconTextSizePx =
                     (pxFromSp(inv.allAppsIconTextSize[typeIndex], metric).toFloat() * scale)
@@ -161,9 +177,15 @@ data class AllAppsProfile(
             responsiveAllAppsWidthSpec: CalculatedResponsiveSpec,
             responsiveAllAppsHeightSpec: CalculatedResponsiveSpec,
             iconSizeSteps: IconSizeSteps,
+            iconSizeFactor: Float,
             isVerticalBarLayout: Boolean,
         ): AllAppsProfile {
-            var allAppsIconSizePx = responsiveAllAppsCellSpec.iconSize
+            // Responsive specs are independent of the IDP sizes. Apply the drawer's
+            // user factor here, then resize to the measured cell width and height.
+            val safeFactor =
+                if (iconSizeFactor.isFinite()) iconSizeFactor.coerceIn(0.5f, 2.5f) else 1f
+            var allAppsIconSizePx =
+                max(1, (responsiveAllAppsCellSpec.iconSize * safeFactor).roundToInt())
             var allAppsIconTextSizePx: Float = responsiveAllAppsCellSpec.iconTextSize.toFloat()
             var allAppsIconDrawablePaddingPx =
                 getNormalizedIconDrawablePadding(
@@ -179,7 +201,7 @@ data class AllAppsProfile(
             // Reduce the size of the app icon if it doesn't fit
             if (allAppsCellWidthPx < allAppsIconSizePx) {
                 // get a smaller icon size
-                allAppsIconSizePx = iconSizeSteps.getIconSmallerThan(allAppsCellWidthPx)
+                allAppsIconSizePx = min(allAppsCellWidthPx, iconSizeSteps.getIconSmallerThan(allAppsCellWidthPx))
             }
 
             val cellContentDimensions =
@@ -247,6 +269,7 @@ data class AllAppsProfile(
             iconSizePx: Int,
             iconDrawablePaddingOriginalPx: Int,
             cellHeightMultiplier: Float = 1f,
+            availableWidthPx: Int,
         ) =
             when {
                 isScalableGrid -> {
@@ -265,6 +288,7 @@ data class AllAppsProfile(
                     createAllAppsProfileNonScalable(
                         res, inv, metric, typeIndex, scale,
                         cellHeightMultiplier = cellHeightMultiplier,
+                        availableWidthPx = availableWidthPx,
                     )
                 }
             }
