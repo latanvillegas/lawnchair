@@ -135,16 +135,31 @@ data class AllAppsProfile(
             typeIndex: Int,
             scale: Float,
             cellHeightMultiplier: Float = 1f,
+            availableWidthPx: Int,
         ): AllAppsProfile {
             val allAppsBorderSpacePx = calculateAllAppsBorderSpacePx(inv, metric, typeIndex, scale)
-            val allAppsIconSizePx = max(1, pxFromDp(inv.allAppsIconSize[typeIndex], metric, scale))
             val allAppsIconDrawablePaddingPx =
                 res.getDimensionPixelSize(R.dimen.all_apps_icon_drawable_padding)
+            // An unusually large icon must never spill into its neighboring column.
+            // In non-scalable grids the drawer scrolls vertically, so rows may expand.
+            val iconWidthBudget = max(
+                1,
+                availableWidthPx / max(1, inv.numAllAppsColumns) -
+                    2 * allAppsIconDrawablePaddingPx,
+            )
+            val allAppsIconSizePx = min(
+                max(1, pxFromDp(inv.allAppsIconSize[typeIndex], metric, scale)),
+                iconWidthBudget,
+            )
+            val textSizePx = pxFromSp(inv.allAppsIconTextSize[typeIndex], metric) * scale
             return AllAppsProfile(
                 borderSpacePx = allAppsBorderSpacePx,
-                cellHeightPx =
-                    (pxFromDp(inv.allAppsCellSize.get(typeIndex).y, metric, cellHeightMultiplier) +
-                        allAppsBorderSpacePx.y),
+                cellHeightPx = max(
+                    pxFromDp(inv.allAppsCellSize.get(typeIndex).y, metric, cellHeightMultiplier) +
+                        allAppsBorderSpacePx.y,
+                    allAppsIconSizePx + allAppsIconDrawablePaddingPx +
+                        Utilities.calculateTextHeight(textSizePx) * 2,
+                ),
                 iconSizePx = allAppsIconSizePx,
                 iconTextSizePx =
                     (pxFromSp(inv.allAppsIconTextSize[typeIndex], metric).toFloat() * scale)
