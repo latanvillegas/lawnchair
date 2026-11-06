@@ -3,6 +3,12 @@ package app.lawnchair.ui.preferences.components.colorpreference
 import app.lawnchair.theme.color.ColorOption
 
 val staticColors: List<ColorPreferenceEntry<ColorOption>> = sequenceOf(
+    ColorOption.PureRed,
+    ColorOption.PureGreen,
+    ColorOption.PureBlue,
+    ColorOption.PureCyan,
+    ColorOption.PureYellow,
+    ColorOption.PureMagenta,
     ColorOption.CustomColor(0xFFF32020),
     ColorOption.CustomColor(0xFFF20D69),
     ColorOption.CustomColor(0xFF7452FF),
