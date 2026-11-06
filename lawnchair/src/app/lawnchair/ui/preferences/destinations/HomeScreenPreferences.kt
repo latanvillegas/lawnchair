@@ -17,6 +17,8 @@
 package app.lawnchair.ui.preferences.destinations
 
 import android.content.Context
+import android.content.Intent
+import android.content.ActivityNotFoundException
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +42,7 @@ import app.lawnchair.ui.preferences.components.NavigationActionPreference
 import app.lawnchair.ui.preferences.components.OverlayHandlerPreference
 import app.lawnchair.ui.preferences.components.controls.ClickablePreference
 import app.lawnchair.ui.preferences.components.controls.ListPreference
+import app.lawnchair.ui.preferences.components.controls.ListPreferenceEntry
 import app.lawnchair.ui.preferences.components.controls.SliderPreference
 import app.lawnchair.ui.preferences.components.controls.SwitchPreference
 import app.lawnchair.ui.preferences.components.layout.ExpandAndShrink
@@ -133,6 +136,7 @@ fun HomeScreenPreferences(
             )
         }
         PreferenceGroup(heading = stringResource(id = R.string.wallpaper)) {
+            HomeWallpaperModePreference()
             SwitchPreference(
                 prefs.wallpaperScrolling.getAdapter(),
                 label = stringResource(id = R.string.wallpaper_scrolling_label),
@@ -299,4 +303,36 @@ fun HomeScreenTextColorPreference(
         label = stringResource(id = R.string.home_screen_text_color),
         modifier = modifier,
     )
+}
+
+/**
+ * Pure AMOLED hides the wallpaper surface. System/custom restore the Android
+ * wallpaper window; custom also offers the platform wallpaper chooser.
+ */
+@Composable
+fun HomeWallpaperModePreference() {
+    val prefs = preferenceManager()
+    val context = LocalContext.current
+    val mode = prefs.homeWallpaperMode.getAdapter()
+    ListPreference(
+        adapter = mode,
+        entries = listOf(
+            ListPreferenceEntry("amoled") { stringResource(R.string.amoled_wallpaper_pure) },
+            ListPreferenceEntry("system") { stringResource(R.string.amoled_wallpaper_system) },
+            ListPreferenceEntry("custom") { stringResource(R.string.amoled_wallpaper_custom) },
+        ),
+        label = stringResource(R.string.amoled_wallpaper_mode),
+    )
+    ExpandAndShrink(visible = mode.state.value == "custom") {
+        ClickablePreference(
+            label = stringResource(R.string.amoled_wallpaper_choose),
+            onClick = {
+                try {
+                    context.startActivity(Intent(Intent.ACTION_SET_WALLPAPER))
+                } catch (_: ActivityNotFoundException) {
+                    Toast.makeText(context, R.string.wallpaper_picker_unavailable, Toast.LENGTH_SHORT).show()
+                }
+            },
+        )
+    }
 }

@@ -174,6 +174,13 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
                 step = 5,
                 showUnit = "%",
             )
+            SliderPreference(
+                label = stringResource(id = R.string.amoled_home_popup_opacity),
+                adapter = prefs.homePopupOpacity.getAdapter(),
+                valueRange = 0..100,
+                step = 5,
+                showUnit = "%",
+            )
             ColorPreference(preference = prefs2.accentColor)
             ExpandAndShrink(visible = showColorStyle) {
                 ColorStylePreference(prefs2.colorStyle.getAdapter())

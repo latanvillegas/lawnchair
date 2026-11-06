@@ -120,6 +120,9 @@ class PreferenceManager @Inject constructor(
     val feedProvider = StringPref("pref_feedProvider", "")
     val ignoreFeedWhitelist = BoolPref("pref_ignoreFeedWhitelist", false)
     val launcherTheme = StringPref("pref_launcherTheme", "system")
+    // Opt-in AMOLED workspace mode keeps existing wallpaper installations unchanged.
+    val homeWallpaperMode = StringPref("pref_homeWallpaperMode", "system", recreate)
+    val homePopupOpacity = IntPref("pref_homePopupOpacity", 100, recreate)
     val overrideWindowCornerRadius = BoolPref("pref_overrideWindowCornerRadius", false, recreate)
     val windowCornerRadius = IntPref("pref_windowCornerRadius", 80, recreate)
     val autoLaunchRoot = BoolPref("pref_autoLaunchRoot", false)

@@ -29,4 +29,11 @@
     <string name="icon_import_preview">Vista previa del icono</string>
     <string name="icon_import_confirm">Usar este icono</string>
 <string name="amoled_navigation_opacity">Opacidad de la barra de navegación</string>
+    <string name="amoled_wallpaper_pure">AMOLED puro (sin fondo)</string>
+    <string name="amoled_wallpaper_system">Fondo del sistema</string>
+    <string name="amoled_wallpaper_custom">Fondo personalizado</string>
+    <string name="amoled_wallpaper_mode">Fondo de pantalla de inicio</string>
+    <string name="amoled_wallpaper_choose">Elegir fondo de pantalla</string>
+    <string name="wallpaper_picker_unavailable">No se encontró selector de fondos</string>
+    <string name="amoled_home_popup_opacity">Opacidad del menú de inicio</string>
 </resources>

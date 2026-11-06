@@ -160,8 +160,10 @@ class LawnchairLauncher : QuickstepLauncher() {
     override fun onCreate(savedInstanceState: Bundle?) {
         layoutInflater.factory2 = LawnchairLayoutFactory(this)
         super.onCreate(savedInstanceState)
+        applyHomeWallpaperMode()
 
         prefs.launcherTheme.subscribeChanges(this, ::updateTheme)
+        prefs.homeWallpaperMode.subscribeChanges(this, ::applyHomeWallpaperMode)
         prefs.feedProvider.subscribeChanges(this, defaultOverlay::reconnect)
         preferenceManager2.enableFeed.get().distinctUntilChanged().onEach { enable ->
             defaultOverlay.setEnableFeed(enable)
@@ -287,11 +289,41 @@ class LawnchairLauncher : QuickstepLauncher() {
         ),
     )
 
+    /**
+     * AMOLED workspace mode uses an opaque window background; system/custom modes
+     * keep the normal wallpaper window integration needed by Quickstep.
+     */
+    private fun applyHomeWallpaperMode() {
+        val launcherWindow = window ?: return
+        if (prefs.homeWallpaperMode.get() == "amoled") {
+            launcherWindow.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+            val systemDark = (resources.configuration.uiMode and
+                android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+                android.content.res.Configuration.UI_MODE_NIGHT_YES
+            val useDark = when (prefs.launcherTheme.get().lowercase()) {
+                "dark" -> true
+                "light" -> false
+                else -> systemDark
+            }
+            launcherWindow.setBackgroundDrawable(
+                android.graphics.drawable.ColorDrawable(
+                    if (useDark) android.graphics.Color.BLACK else android.graphics.Color.WHITE,
+                ),
+            )
+        } else {
+            launcherWindow.addFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER)
+            launcherWindow.setBackgroundDrawableResource(android.R.color.transparent)
+        }
+    }
+
     fun updateTheme() {
         if (themeProvider.colorScheme != colorScheme) {
             recreate()
         } else {
             mWallpaperThemeManager.updateTheme()
+            if (prefs.homeWallpaperMode.get() == "amoled") {
+                applyHomeWallpaperMode()
+            }
         }
     }
 
