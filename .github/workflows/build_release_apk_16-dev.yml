@@ -1,39 +1,44 @@
-name: Build release APK
+name: Build release APK (manual)
 
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build-release-apk:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/16-dev' || endsWith(github.ref, '-alpha') || endsWith(github.ref, '-beta') || endsWith(github.ref, '-rc') || endsWith(github.ref, '-stable')
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v7
         with:
           submodules: true
       - uses: actions/setup-java@v6
         with:
-          distribution: 'zulu'
-          java-version: 21
+          distribution: zulu
+          java-version: '21'
       - uses: gradle/actions/setup-gradle@v6
-        with:
-          cache-encryption-key: Da25KUVSE5jbGds2zXmfXw==
-      - name: Write sign info
-        if: github.repository_owner == 'LawnchairLauncher'
+      - name: Configure release signing when a keystore is available
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          if [ ! -z "${{ secrets.KEYSTORE }}" ]; then
-            echo storePassword='${{ secrets.KEYSTORE_PASSWORD }}' >> keystore.properties
-            echo keyAlias='${{ secrets.KEY_ALIAS }}' >> keystore.properties
-            echo keyPassword='${{ secrets.KEY_PASSWORD }}' >> keystore.properties
-            echo storeFile='${{ github.workspace }}/key.jks' >> keystore.properties
-            echo ${{ secrets.KEYSTORE }} | base64 --decode > ${{ github.workspace }}/key.jks
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/key.jks"
+            {
+              printf 'storePassword=%s\n' "$KEYSTORE_PASSWORD"
+              printf 'keyAlias=%s\n' "$KEY_ALIAS"
+              printf 'keyPassword=%s\n' "$KEY_PASSWORD"
+              printf 'storeFile=%s\n' "$GITHUB_WORKSPACE/key.jks"
+            } > keystore.properties
           fi
       - name: Build release APK
-        run: ./gradlew assembleLawnWithQuickstepGithubRelease bundleLawnWithQuickstepPlayRelease
-      - name: Upload artifact
+        run: ./gradlew assembleLawnWithQuickstepGithubRelease
+      - name: Upload release APK
         uses: actions/upload-artifact@v7
         with:
-          name: Release APK
-          path: build/outputs/*
-
+          name: Lawnchair-Release-APK
+          path: build/outputs/apk/lawnWithQuickstepGithub/release/*.apk
+          if-no-files-found: error

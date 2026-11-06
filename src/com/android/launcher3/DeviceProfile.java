@@ -1231,8 +1231,16 @@ public class DeviceProfile {
         final boolean isVerticalLayout = isVerticalBarLayout();
         cellLayoutBorderSpacePx = getCellLayoutBorderSpace(inv, scale);
 
-        // Lawnchair: Get initial text size before calculating layout
-        // This scales offset with text sizing, all the way down to zero
+        // A second call to updateIconSize(scale) is made when the grid does not fit
+        // (commonly in landscape). Recalculate the icon and label from the unscaled
+        // invariant values on every pass; scaling only the cell size clips icons
+        // at the row boundaries and can cause adjacent rows to overlap.
+        if (!mIsResponsiveGrid) {
+            iconSizePx = Math.max(1, pxFromDp(inv.iconSize[mTypeIndex], mMetrics, scale));
+            iconTextSizePx = pxFromSp(inv.iconTextSize[mTypeIndex], mMetrics, scale);
+        }
+
+        // Lawnchair: Apply the label factor exactly once per size recalculation.
         iconTextSizePx *= mTextFactors.getIconTextSizeFactor();
 
         if (mIsResponsiveGrid) {

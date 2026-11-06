@@ -31,6 +31,7 @@ import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.drawable.BitmapDrawable
@@ -46,19 +47,18 @@ import android.widget.TextView
 import androidx.compose.ui.util.lerp
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.createBitmap
-import androidx.core.graphics.luminance
 import androidx.core.os.UserManagerCompat
 import app.lawnchair.preferences.PreferenceManager
 import app.lawnchair.preferences2.PreferenceManager2
 import app.lawnchair.preferences2.firstCached
 import app.lawnchair.theme.color.ColorOption
 import app.lawnchair.theme.color.tokens.ColorTokens
+import app.lawnchair.wallpaper.WallpaperManagerCompat
 import com.android.launcher3.BaseActivity
 import com.android.launcher3.BuildConfig
 import com.android.launcher3.R
 import com.android.launcher3.Utilities
 import com.android.launcher3.util.Executors.MAIN_EXECUTOR
-import com.android.launcher3.util.Themes
 import com.android.launcher3.views.ActivityContext
 import com.android.systemui.shared.system.QuickStepContract
 import java.io.ByteArrayOutputStream
@@ -150,11 +150,20 @@ fun supportsRoundedCornersOnWindows(context: Context): Boolean {
 
 fun overrideAllAppsTextColor(textView: TextView) {
     val context = textView.context
-    val luminance = getAllAppsBaseColor(context, ColorTokens.AllAppsScrimColor.resolveColor(context)).luminance
-    val opacity = PreferenceManager.getInstance(context).drawerOpacity.get()
-    if (luminance > 0.5f || opacity <= 0.3f) {
-        textView.setTextColor(Themes.getAttrColor(context, R.attr.allAppsAlternateTextColor))
-    }
+    val drawerBackground = getAllAppsBackgroundColor(
+        context,
+        ColorTokens.AllAppsScrimColor.resolveColor(context),
+    )
+    val wallpaperBackground = WallpaperManagerCompat.INSTANCE.get(context).wallpaperColors?.primaryColor
+        ?: ColorTokens.ColorBackground.resolveColor(context)
+    // The drawer can be transparent, so compare against the actual blended background.
+    val visibleBackground = ColorUtils.compositeColors(
+        drawerBackground,
+        ColorUtils.setAlphaComponent(wallpaperBackground, 255),
+    )
+    val darkTextContrast = ColorUtils.calculateContrast(Color.BLACK, visibleBackground)
+    val lightTextContrast = ColorUtils.calculateContrast(Color.WHITE, visibleBackground)
+    textView.setTextColor(if (darkTextContrast >= lightTextContrast) Color.BLACK else Color.WHITE)
 }
 
 @Suppress("UNCHECKED_CAST")
