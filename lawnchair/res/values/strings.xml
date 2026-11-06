@@ -1100,4 +1100,9 @@
     <string name="drawer_sort_za">Alphabetical (Z–A)</string>
     <string name="drawer_sort_recent">Recently installed</string>
     <string name="icon_brightness_label">Icon and label brightness</string>
+    <string name="icon_import_gallery">Choose from gallery</string>
+    <string name="icon_import_files">Choose from files</string>
+    <string name="icon_import_in_progress">Importing icon…</string>
+    <string name="icon_import_preview">Imported icon preview</string>
+    <string name="icon_import_confirm">Use this icon</string>
 </resources>
