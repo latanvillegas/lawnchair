@@ -1189,8 +1189,11 @@ public class DeviceProfile {
      * that setting otherwise.
      */
     private int getResponsiveIconSizePx() {
-        return Math.max(1, Math.round(mResponsiveWorkspaceCellSpec.getIconSize()
-                * PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getHomeIconSizeFactor())));
+        final float configuredFactor = PreferenceCacheExtensionsKt
+                .firstCached(preferenceManager2.getHomeIconSizeFactor());
+        final float safeFactor = Float.isFinite(configuredFactor)
+                ? Utilities.boundToRange(configuredFactor, 0.5f, 2.5f) : 1f;
+        return Math.max(1, Math.round(mResponsiveWorkspaceCellSpec.getIconSize() * safeFactor));
     }
 
     private int getCellLayoutHeightSpecification() {
@@ -1355,7 +1358,7 @@ public class DeviceProfile {
                     + iconDrawablePaddingPx
                     + Utilities.calculateTextHeight(iconTextSizePx);
             maxIconTextLineCount = 1;
-            int cellPaddingY = (getCellSize().y - cellHeightPx) / 2;
+            int cellPaddingY = Math.max(0, (getCellSize().y - cellHeightPx) / 2);
             if (iconDrawablePaddingPx > cellPaddingY && !isVerticalLayout
                     && !mDeviceProperties.isMultiWindowMode()) {
                 // Ensures that the label is closer to its corresponding icon. This is not an issue
@@ -1373,6 +1376,7 @@ public class DeviceProfile {
                     mResponsiveAllAppsWidthSpec,
                     mResponsiveAllAppsHeightSpec,
                     mIconSizeSteps,
+                    PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getDrawerIconSizeFactor()),
                     isVerticalBarLayout()
             );
             updateAllAppsWithResponsiveMeasures();
@@ -1388,7 +1392,8 @@ public class DeviceProfile {
                     1f, // See comment above
                     iconSizePx,
                     mIconDrawablePaddingOriginalPx,
-                    allAppsCellHeightMultiplier
+                    allAppsCellHeightMultiplier,
+                    mDeviceProperties.getAvailableWidthPx()
             );
         }
         updateAllAppsContainerWidth();
