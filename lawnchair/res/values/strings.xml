@@ -1094,4 +1094,10 @@
     <string name="lawnchair_action_failed">Failed to trigger action</string>
 
     <string name="please_wait">Please wait…</string>
+    <string name="drawer_sort_heading">App order</string>
+    <string name="drawer_sort_label">Sort apps</string>
+    <string name="drawer_sort_az">Alphabetical (A–Z)</string>
+    <string name="drawer_sort_za">Alphabetical (Z–A)</string>
+    <string name="drawer_sort_recent">Recently installed</string>
+    <string name="icon_brightness_label">Icon brightness</string>
 </resources>
