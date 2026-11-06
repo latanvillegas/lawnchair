@@ -48,6 +48,8 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
@@ -151,6 +153,11 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
     private static final int[] STATE_PRESSED = new int[]{android.R.attr.state_pressed};
 
     private float mScaleForReorderBounce = 1f;
+
+    // Reuse the layer paint and color filter while the brightness preference is unchanged.
+    // A new Paint/ColorMatrix per onDraw would produce avoidable UI-thread allocations.
+    private final Paint mBrightnessPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+    private float mAppliedBrightness = -1f;
 
     private IntArray mBreakPointsIntArray;
     private CharSequence mLastOriginalText;
@@ -925,9 +932,43 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
 
     @Override
     public void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        drawDotIfNecessary(canvas);
-        drawRunningAppIndicatorIfNecessary(canvas);
+        final boolean drawerIcon = mDisplay == DISPLAY_ALL_APPS
+                || mDisplay == DISPLAY_PREDICTION_ROW
+                || mDisplay == DISPLAY_DRAWER_FOLDER;
+        final boolean homeIcon = mDisplay == DISPLAY_WORKSPACE
+                || mDisplay == DISPLAY_FOLDER
+                || mDisplay == DISPLAY_TASKBAR;
+
+        float brightness = 1f;
+        if (drawerIcon) {
+            brightness = PreferenceCacheExtensionsKt.firstCached(pref2.getDrawerIconBrightness());
+        } else if (homeIcon) {
+            brightness = PreferenceCacheExtensionsKt.firstCached(pref2.getHomeIconBrightness());
+        }
+        // Brightness is opt-in. Defaults to 100%, which uses the normal draw path.
+        brightness = Float.isFinite(brightness) ? Math.max(0f, Math.min(1f, brightness)) : 1f;
+        if ((homeIcon || drawerIcon) && brightness < 1f) {
+            if (mAppliedBrightness != brightness) {
+                ColorMatrix matrix = new ColorMatrix(new float[]{
+                        brightness, 0f, 0f, 0f, 0f,
+                        0f, brightness, 0f, 0f, 0f,
+                        0f, 0f, brightness, 0f, 0f,
+                        0f, 0f, 0f, 1f, 0f
+                });
+                mBrightnessPaint.setColorFilter(new ColorMatrixColorFilter(matrix));
+                mAppliedBrightness = brightness;
+            }
+            int layer = canvas.saveLayer(
+                    0f, 0f, getWidth(), getHeight(), mBrightnessPaint);
+            super.onDraw(canvas);
+            drawDotIfNecessary(canvas);
+            drawRunningAppIndicatorIfNecessary(canvas);
+            canvas.restoreToCount(layer);
+        } else {
+            super.onDraw(canvas);
+            drawDotIfNecessary(canvas);
+            drawRunningAppIndicatorIfNecessary(canvas);
+        }
     }
 
     /**
