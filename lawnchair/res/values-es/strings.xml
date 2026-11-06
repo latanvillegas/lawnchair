@@ -28,4 +28,5 @@
     <string name="icon_import_in_progress">Importando icono…</string>
     <string name="icon_import_preview">Vista previa del icono</string>
     <string name="icon_import_confirm">Usar este icono</string>
+<string name="amoled_navigation_opacity">Opacidad de la barra de navegación</string>
 </resources>

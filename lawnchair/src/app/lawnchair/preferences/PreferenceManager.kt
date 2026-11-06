@@ -114,7 +114,8 @@ class PreferenceManager @Inject constructor(
     val folderRows = IdpIntPref("pref_folderRows", { numFolderRows[INDEX_DEFAULT] }, reloadGrid)
 
     val drawerSortMode = StringPref("pref_drawerSortMode", "default", reloadIcons)
-    val drawerOpacity = FloatPref("pref_drawerOpacity", .5f, recreate)
+    val drawerOpacity = FloatPref("pref_drawerOpacity", 1f, recreate)
+    val navigationBarOpacity = IntPref("pref_navigationBarOpacity", 95)
     val coloredBackgroundLightness = FloatPref("pref_coloredBackgroundLightness", 1F)
     val feedProvider = StringPref("pref_feedProvider", "")
     val ignoreFeedWhitelist = BoolPref("pref_ignoreFeedWhitelist", false)
