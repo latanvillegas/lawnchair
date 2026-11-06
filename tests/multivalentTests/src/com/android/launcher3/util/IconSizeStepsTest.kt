@@ -57,6 +57,13 @@ class IconSizeStepsTest {
     }
 
     @Test
+    fun iconBiggerThanAllConfiguredStepsFallsBackToLargestAvailable() {
+        val largestConfiguredSize = iconSizeSteps.getIconSmallerThan(Int.MAX_VALUE)
+        assertThat(iconSizeSteps.getNextLowerIconSize(largestConfiguredSize + 100))
+            .isEqualTo(largestConfiguredSize)
+    }
+
+    @Test
     fun getIconSmallerThan() {
         assertThat(iconSizeSteps.getIconSmallerThan(60)).isEqualTo(59)
 
