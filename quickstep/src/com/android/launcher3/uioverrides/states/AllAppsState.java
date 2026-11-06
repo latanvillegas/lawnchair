@@ -213,11 +213,17 @@ public class AllAppsState extends LauncherState {
             // Always use an opaque scrim if there's no sheet.
             backgroundColor = ColorTokens.AllAppsScrimColor.resolveColor(launcher);
         } else if (!Flags.allAppsBlur()) {
-            // If there's a sheet but no blur, use the old scrim color.
-            backgroundColor = LawnchairUtilsKt.getAllAppsBackgroundColor(launcher, 
-                ColorTokens.WidgetsPickerScrim.resolveColor(launcher));
+            // If there's a sheet but no blur, use the configured drawer color.
+            backgroundColor = LawnchairUtilsKt.getAllAppsBackgroundColor(launcher,
+                    ColorTokens.WidgetsPickerScrim.resolveColor(launcher));
         } else {
-            backgroundColor = ColorTokens.AllAppsScrimColor.resolveColor(launcher);
+            // AMOLED mode needs to cover the entire display, including the space outside
+            // the sheet's rounded corners. Otherwise the default translucent scrim appears
+            // gray against a pure-black drawer.
+            int drawerColor = LawnchairUtilsKt.getAllAppsBackgroundColor(launcher,
+                    ColorTokens.AllAppsScrimColor.resolveColor(launcher));
+            backgroundColor = drawerColor == Color.BLACK
+                    ? Color.BLACK : ColorTokens.AllAppsScrimColor.resolveColor(launcher);
         }
         return new ScrimColors(backgroundColor, /* foregroundColor */ Color.TRANSPARENT);
     }
