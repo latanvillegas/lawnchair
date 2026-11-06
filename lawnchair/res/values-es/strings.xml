@@ -23,4 +23,9 @@
     <string name="drawer_sort_za">Alfabético (Z–A)</string>
     <string name="drawer_sort_recent">Instaladas recientemente</string>
     <string name="icon_brightness_label">Brillo de iconos y etiquetas</string>
+    <string name="icon_import_gallery">Elegir de la galería</string>
+    <string name="icon_import_files">Elegir de archivos</string>
+    <string name="icon_import_in_progress">Importando icono…</string>
+    <string name="icon_import_preview">Vista previa del icono</string>
+    <string name="icon_import_confirm">Usar este icono</string>
 </resources>

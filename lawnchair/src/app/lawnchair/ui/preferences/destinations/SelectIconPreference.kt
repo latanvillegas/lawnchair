@@ -14,6 +14,9 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.lawnchair.data.iconoverride.IconOverrideRepository
 import app.lawnchair.icons.picker.IconPickerItem
+import app.lawnchair.icons.picker.IconType
+import app.lawnchair.icons.picker.ImportedIconPickerActions
+import app.lawnchair.icons.picker.ImportedIconStore
 import app.lawnchair.ui.preferences.LocalNavController
 import app.lawnchair.ui.preferences.LocalPreferenceInteractor
 import app.lawnchair.ui.preferences.components.AppItem
@@ -48,12 +51,10 @@ fun SelectIconPreference(componentKey: ComponentKey) {
     val model = launcherAppState.model
 
     val repo = IconOverrideRepository.INSTANCE.get(context)
-    OnResult<IconPickerItem> { item ->
+    val applyIcon: (IconPickerItem) -> Unit = { item ->
         scope.launch {
             repo.setOverride(componentKey, item)
-            // Refresh package icons while the model is still loaded; forceReload alone can
-            // skip PackageUpdatedTask and leave icon-cache entries that look "fresh".
-            // onAppIconChanged is @WorkerThread (blocking ShortcutManager query).
+            // Ensure package icon cache reflects the new icon before leaving the picker.
             withContext(Dispatchers.IO) {
                 model.onAppIconChanged(componentKey.componentName.packageName, componentKey.user)
             }
@@ -63,11 +64,24 @@ fun SelectIconPreference(componentKey: ComponentKey) {
             }
         }
     }
+    OnResult<IconPickerItem> { item -> applyIcon(item) }
 
     val overrideItem by repo.observeTarget(componentKey).collectAsStateWithLifecycle(initialValue = null)
     val hasOverride = overrideItem != null
 
     PreferenceLayoutLazyColumn(label = label) {
+        item {
+            ImportedIconPickerActions(onImport = { filename ->
+                applyIcon(
+                    IconPickerItem(
+                        ImportedIconStore.PACKAGE_NAME,
+                        filename,
+                        label,
+                        IconType.Normal,
+                    ),
+                )
+            })
+        }
         if (hasOverride) {
             preferenceGroupItems(1, isFirstChild = true) {
                 ClickablePreference(
