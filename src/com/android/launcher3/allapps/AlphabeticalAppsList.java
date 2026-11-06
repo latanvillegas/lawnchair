@@ -30,6 +30,8 @@ import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCH
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_PRIVATE_SPACE_USER_INSTALLED_APPS_COUNT;
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ImageSpan;
@@ -40,6 +42,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.DiffUtil;
 
 import com.android.launcher3.Flags;
+import com.android.launcher3.LauncherPrefs;
 import com.android.launcher3.R;
 import com.android.launcher3.allapps.BaseAllAppsAdapter.AdapterItem;
 import com.android.launcher3.model.data.AppInfo;
@@ -49,6 +52,8 @@ import com.android.launcher3.views.ActivityContext;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -257,14 +262,45 @@ public class AlphabeticalAppsList<T extends Context & ActivityContext> implement
                         .filter(mPrivateProviderManager.getItemInfoMatcher());
             }
         }
-        appSteam = appSteam.sorted(mAppNameComparator);
-        privateAppStream = privateAppStream.sorted(mAppNameComparator);
+        // Keep Launcher3's default ordering. Optional modes affect only the app drawer;
+        // private profile apps remain in their original isolated section.
+        String sortMode = LauncherPrefs.getPrefs(mActivityContext)
+                .getString("pref_drawerSortMode", "default");
+        Comparator<AppInfo> drawerComparator = mAppNameComparator;
+        if ("za".equals(sortMode)) {
+            drawerComparator = mAppNameComparator.reversed();
+        } else if ("recent".equals(sortMode)) {
+            HashMap<String, Long> installTimes = new HashMap<>();
+            PackageManager packageManager = mActivityContext.getPackageManager();
+            for (AppInfo app : mAllAppsStore.getApps()) {
+                if (app.componentName == null) {
+                    continue;
+                }
+                String packageName = app.componentName.getPackageName();
+                if (!installTimes.containsKey(packageName)) {
+                    long installTime = 0L;
+                    try {
+                        PackageInfo packageInfo = packageManager.getPackageInfo(packageName, 0);
+                        installTime = packageInfo.firstInstallTime;
+                    } catch (PackageManager.NameNotFoundException ignored) {
+                        // Packages may be removed while the launcher model is refreshing.
+                    }
+                    installTimes.put(packageName, installTime);
+                }
+            }
+            drawerComparator = Comparator.<AppInfo>comparingLong(app ->
+                    app.componentName == null ? 0L : installTimes.getOrDefault(
+                            app.componentName.getPackageName(), 0L))
+                    .reversed().thenComparing(mAppNameComparator);
+        }
+        appSteam = appSteam.sorted(drawerComparator);
+        privateAppStream = privateAppStream.sorted(drawerComparator);
 
         // As a special case for some languages (currently only Simplified Chinese), we may need to
         // coalesce sections
         Locale curLocale = mActivityContext.getResources().getConfiguration().locale;
         boolean localeRequiresSectionSorting = curLocale.equals(Locale.SIMPLIFIED_CHINESE);
-        if (localeRequiresSectionSorting) {
+        if (localeRequiresSectionSorting && "default".equals(sortMode)) {
             // Compute the section headers. We use a TreeMap with the section name comparator to
             // ensure that the sections are ordered when we iterate over it later
             appSteam = appSteam.collect(Collectors.groupingBy(
