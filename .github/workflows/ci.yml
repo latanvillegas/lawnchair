@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - '*-dev'
+      - '16-beta'
   pull_request:
   workflow_dispatch:
 
