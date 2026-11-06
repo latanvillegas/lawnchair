@@ -29,7 +29,10 @@ sealed class ColorOption {
     object PureBlack : ColorOption() {
         override val isSupported = true
         override val colorPreferenceEntry = ColorPreferenceEntry<ColorOption>(
-            this, { "Negro puro AMOLED/OLED" }, { Color.BLACK },
+            this,
+            { "Negro puro AMOLED/OLED" },
+            { Color.BLACK },
+            { Color.BLACK },
         )
         override fun toString() = "pure_black"
     }
@@ -37,7 +40,10 @@ sealed class ColorOption {
     object PureWhite : ColorOption() {
         override val isSupported = true
         override val colorPreferenceEntry = ColorPreferenceEntry<ColorOption>(
-            this, { "Blanco puro" }, { Color.WHITE },
+            this,
+            { "Blanco puro" },
+            { Color.WHITE },
+            { Color.WHITE },
         )
         override fun toString() = "pure_white"
     }
@@ -63,7 +69,18 @@ sealed class ColorOption {
 
         override val colorPreferenceEntry = ColorPreferenceEntry<ColorOption>(
             this,
-            { stringResource(id = R.string.custom) },
+            {
+                when (color) {
+                    0xFFFF0000.toInt() -> "Rojo puro · #FF0000"
+                    0xFF00FF00.toInt() -> "Verde puro · #00FF00"
+                    0xFF0000FF.toInt() -> "Azul puro · #0000FF"
+                    0xFF00FFFF.toInt() -> "Cian puro · #00FFFF"
+                    0xFFFFFF00.toInt() -> "Amarillo puro · #FFFF00"
+                    0xFFFF00FF.toInt() -> "Magenta puro · #FF00FF"
+                    else -> stringResource(id = R.string.custom)
+                }
+            },
+            { color },
             { color },
         )
 
@@ -89,6 +106,14 @@ sealed class ColorOption {
     }
 
     companion object {
+        // Fully saturated RGB presets; selected explicitly so Material You remains available.
+        val PureRed = CustomColor(0xFFFF0000)
+        val PureGreen = CustomColor(0xFF00FF00)
+        val PureBlue = CustomColor(0xFF0000FF)
+        val PureCyan = CustomColor(0xFF00FFFF)
+        val PureYellow = CustomColor(0xFFFFFF00)
+        val PureMagenta = CustomColor(0xFFFF00FF)
+
         val LawnchairBlue = CustomColor(0xFF007FFF)
 
         fun fromString(stringValue: String) = when (stringValue) {
