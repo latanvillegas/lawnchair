@@ -40,6 +40,7 @@ import app.lawnchair.ui.preferences.components.colorpreference.ColorContrastWarn
 import app.lawnchair.ui.preferences.components.colorpreference.ColorPreference
 import app.lawnchair.ui.preferences.components.controls.ListPreference
 import app.lawnchair.ui.preferences.components.controls.ListPreferenceEntry
+import app.lawnchair.ui.preferences.components.controls.SliderPreference
 import app.lawnchair.ui.preferences.components.controls.SwitchPreference
 import app.lawnchair.ui.preferences.components.controls.WarningPreference
 import app.lawnchair.ui.preferences.components.layout.ExpandAndShrink
@@ -166,6 +167,13 @@ fun GeneralPreferences(modifier: Modifier = Modifier) {
 
         PreferenceGroup(heading = stringResource(id = R.string.colors)) {
             ThemePreference()
+            SliderPreference(
+                label = stringResource(id = R.string.amoled_navigation_opacity),
+                adapter = prefs.navigationBarOpacity.getAdapter(),
+                valueRange = 0..100,
+                step = 5,
+                showUnit = "%",
+            )
             ColorPreference(preference = prefs2.accentColor)
             ExpandAndShrink(visible = showColorStyle) {
                 ColorStylePreference(prefs2.colorStyle.getAdapter())

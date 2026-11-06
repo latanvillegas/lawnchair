@@ -241,9 +241,24 @@ fun resolveFolderBackgroundColor(context: Context): Int {
 /** Apply Lawnchair custom allapps colour to the provided colour */
 private fun getAllAppsBaseColor(context: Context, defaultColor: Int): Int {
     val prefs2 = PreferenceManager2.getInstance(context)
-    val colorOptions: ColorOption = prefs2.appDrawerBackgroundColor.firstCached()
-    val color = colorOptions.colorPreferenceEntry.lightColor.invoke(context)
-    val baseColor = if (color != 0) color else defaultColor
+    val colorOption: ColorOption = prefs2.appDrawerBackgroundColor.firstCached()
+    val baseColor = if (colorOption == ColorOption.Default) {
+        // The managed drawer background follows the explicit launcher theme and
+        // uses an AMOLED-true color rather than the translucent gray AOSP scrim.
+        val nightMode = context.resources.configuration.uiMode and
+            android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        val systemDark = nightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val isDark = when (PreferenceManager.getInstance(context).launcherTheme.get().lowercase()) {
+            "dark" -> true
+            "light" -> false
+            else -> systemDark
+        }
+        if (isDark) android.graphics.Color.BLACK else android.graphics.Color.WHITE
+    } else {
+        // Explicit System Accent, wallpaper and custom colors remain configurable.
+        colorOption.colorPreferenceEntry.lightColor.invoke(context).takeIf { it != 0 }
+            ?: defaultColor
+    }
     return ColorUtils.setAlphaComponent(baseColor, 255)
 }
 
