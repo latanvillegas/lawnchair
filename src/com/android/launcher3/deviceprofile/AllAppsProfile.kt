@@ -139,15 +139,15 @@ data class AllAppsProfile(
             availableWidthPx: Int,
         ): AllAppsProfile {
             val allAppsBorderSpacePx = calculateAllAppsBorderSpacePx(inv, metric, typeIndex, scale)
-            val allAppsIconDrawablePaddingPx =
-                res.getDimensionPixelSize(R.dimen.all_apps_icon_drawable_padding)
-            // An unusually large icon must never spill into its neighboring column.
-            // In non-scalable grids the drawer scrolls vertically, so rows may expand.
-            val iconWidthBudget = max(
-                1,
-                availableWidthPx / max(1, inv.numAllAppsColumns) -
-                    2 * allAppsIconDrawablePaddingPx,
+            // The number of columns can be set as high as ten even on narrow phones.
+            // Bound icon padding as well as the bitmap so every row fits its real width.
+            val columnWidthBudget = max(1, availableWidthPx / max(1, inv.numAllAppsColumns))
+            val allAppsIconDrawablePaddingPx = min(
+                max(0, res.getDimensionPixelSize(R.dimen.all_apps_icon_drawable_padding)),
+                max(0, (columnWidthBudget - 1) / 2),
             )
+            // In non-scalable grids the drawer scrolls vertically, so rows may expand.
+            val iconWidthBudget = max(1, columnWidthBudget - 2 * allAppsIconDrawablePaddingPx)
             val allAppsIconSizePx = min(
                 max(1, pxFromDp(inv.allAppsIconSize[typeIndex], metric, scale)),
                 iconWidthBudget,
