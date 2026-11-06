@@ -16,6 +16,13 @@ import com.android.launcher3.util.DaggerSingletonObject
 import com.android.launcher3.util.SafeCloseable
 import javax.inject.Inject
 
+/**
+ * Restrict restored or externally edited icon-size values to the supported slider range.
+ * NaN or infinity must never reach icon metrics, since they can corrupt grid calculations.
+ */
+internal fun safeIconSizeFactor(value: Float): Float =
+    if (value.isFinite()) value.coerceIn(0.5f, 2.5f) else 1f
+
 @LauncherAppSingleton
 class DeviceProfileOverrides @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -121,8 +128,8 @@ class DeviceProfileOverrides @Inject constructor(
             numFolderRows = prefs.folderRows.get(defaultGrid),
             numFolderColumns = prefs2.folderColumns.firstCached(gridOption = defaultGrid),
 
-            iconSizeFactor = prefs2.homeIconSizeFactor.firstCached(),
-            allAppsIconSizeFactor = prefs2.drawerIconSizeFactor.firstCached(),
+            iconSizeFactor = safeIconSizeFactor(prefs2.homeIconSizeFactor.firstCached()),
+            allAppsIconSizeFactor = safeIconSizeFactor(prefs2.drawerIconSizeFactor.firstCached()),
             allAppsIconTextSizeFactor =
             if (prefs2.showIconLabelsInDrawer.firstCached()) {
                 prefs2.drawerIconLabelSizeFactor.firstCached()
