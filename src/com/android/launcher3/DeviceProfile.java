@@ -1189,8 +1189,9 @@ public class DeviceProfile {
      * that setting otherwise.
      */
     private int getResponsiveIconSizePx() {
-        return Math.max(1, Math.round(mResponsiveWorkspaceCellSpec.getIconSize()
-                * PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getHomeIconSizeFactor())));
+        float userScale = Utilities.boundToRange(PreferenceCacheExtensionsKt
+                .firstCached(preferenceManager2.getHomeIconSizeFactor()), 0.5f, 1.5f);
+        return Math.max(1, Math.round(mResponsiveWorkspaceCellSpec.getIconSize() * userScale));
     }
 
     private int getCellLayoutHeightSpecification() {
@@ -1259,8 +1260,8 @@ public class DeviceProfile {
             maxIconTextLineCount = mResponsiveWorkspaceCellSpec.getIconTextMaxLineCount();
 
             if (cellWidthPx < iconSizePx) {
-                // get a smaller icon size
-                iconSizePx = mIconSizeSteps.getIconSmallerThan(cellWidthPx);
+                // Use the actual cell width rather than jumping down an entire icon-size step.
+                iconSizePx = Math.max(1, cellWidthPx);
             }
 
             if (isVerticalLayout) {
@@ -1372,8 +1373,9 @@ public class DeviceProfile {
                     mResponsiveAllAppsCellSpec,
                     mResponsiveAllAppsWidthSpec,
                     mResponsiveAllAppsHeightSpec,
-                    mIconSizeSteps,
-                    isVerticalBarLayout()
+                    isVerticalBarLayout(),
+                    PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getDrawerIconSizeFactor()),
+                    allAppsCellHeightMultiplier
             );
             updateAllAppsWithResponsiveMeasures();
         } else {
