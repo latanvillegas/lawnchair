@@ -18,8 +18,10 @@ package app.lawnchair.ui.preferences
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
@@ -34,6 +36,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -70,6 +73,14 @@ val twoPaneBlacklist = setOf(
     SelectIcon::class,
 )
 
+/**
+ * A system WindowSizeClass can temporarily describe the display rather than the actual
+ * activity bounds when the launcher preferences are opened in desktop/freeform mode.
+ * Never create a 420dp + second pane layout unless the measured content fits both panes.
+ */
+internal fun canShowSettingsTwoPane(widthDp: Float, heightDp: Float): Boolean =
+    widthDp.isFinite() && heightDp.isFinite() && widthDp >= 900f && heightDp >= 480f
+
 @Composable
 fun Preferences(
     windowSizeClass: WindowSizeClass,
@@ -80,43 +91,45 @@ fun Preferences(
     interactor: PreferenceInteractor = viewModel<PreferenceViewModel>(),
 ) {
     val navController = rememberNavController()
-    val isExpandedScreen = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
-        windowSizeClass.heightSizeClass in
-        setOf(WindowHeightSizeClass.Expanded, WindowHeightSizeClass.Medium)
-
-    val defaultStartingRoute = if (isExpandedScreen) General else Root
-    val startingRoute = startDestination ?: defaultStartingRoute
-
-    val blacklistedRoute = startingRoute::class in twoPaneBlacklist
-    val useTwoPane = !blacklistedRoute && isExpandedScreen
-
-    var currentTopRoute by remember { mutableStateOf(defaultStartingRoute) }
 
     Providers {
-        Surface(
-            color = MaterialTheme.colorScheme.surface,
-            modifier = modifier,
-        ) {
-            CompositionLocalProvider(
-                LocalNavController provides navController,
-                LocalPreferenceInteractor provides interactor,
-                LocalIsExpandedScreen provides isExpandedScreen,
+        BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+            // Measure the CURRENT content bounds, not the overall display metrics.
+            // On Android freeform windows and split-screen, these can differ greatly.
+            val isExpandedScreen = canShowSettingsTwoPane(maxWidth.value, maxHeight.value) &&
+                windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded &&
+                windowSizeClass.heightSizeClass in setOf(
+                    WindowHeightSizeClass.Expanded,
+                    WindowHeightSizeClass.Medium,
+                )
+            val defaultStartingRoute = if (isExpandedScreen) General else Root
+            val startingRoute = startDestination ?: defaultStartingRoute
+            val useTwoPane = isExpandedScreen && startingRoute::class !in twoPaneBlacklist
+            var currentTopRoute by remember { mutableStateOf(defaultStartingRoute) }
+
+            Surface(
+                color = MaterialTheme.colorScheme.surface,
+                modifier = Modifier.fillMaxSize(),
             ) {
-                PreferenceScreen(
-                    currentTopRoute = currentTopRoute,
-                    onRouteChange = {
-                        currentTopRoute = it
-                    },
-                    useTwoPane = useTwoPane,
-                    displayFeatures = displayFeatures,
-                    isExpandedScreen = isExpandedScreen,
-                    navController = navController,
+                CompositionLocalProvider(
+                    LocalNavController provides navController,
+                    LocalPreferenceInteractor provides interactor,
+                    LocalIsExpandedScreen provides isExpandedScreen,
                 ) {
-                    PreferenceNavigation(
+                    PreferenceScreen(
+                        currentTopRoute = currentTopRoute,
+                        onRouteChange = { currentTopRoute = it },
+                        useTwoPane = useTwoPane,
+                        displayFeatures = displayFeatures,
+                        isExpandedScreen = isExpandedScreen,
                         navController = navController,
-                        startDestination = startingRoute,
-                        intent = intent,
-                    )
+                    ) {
+                        PreferenceNavigation(
+                            navController = navController,
+                            startDestination = startingRoute,
+                            intent = intent,
+                        )
+                    }
                 }
             }
         }
@@ -160,13 +173,18 @@ private fun PreferenceScreen(
         isExpandedScreen -> {
             Surface(
                 color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier
-                    .fillMaxWidth(),
+                modifier = Modifier.fillMaxSize(),
             ) {
                 Box(
-                    modifier = Modifier.requiredWidth(640.dp),
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.TopCenter,
                 ) {
-                    moveableNavHost()
+                    Box(
+                        // max 640dp, but shrink to the actual viewport in a freeform window.
+                        modifier = Modifier.widthIn(max = 640.dp).fillMaxWidth(),
+                    ) {
+                        moveableNavHost()
+                    }
                 }
             }
         }
