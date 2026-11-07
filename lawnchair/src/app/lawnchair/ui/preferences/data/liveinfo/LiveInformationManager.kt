@@ -27,6 +27,10 @@ class LiveInformationManager@Inject constructor(
         // a new instance every time DataStore deserializes a preference.
         private val tolerantJson = Json { ignoreUnknownKeys = true }
 
+        internal fun parseDismissedAnnouncementIds(saved: String): Set<AnnouncementId> =
+            runCatching { tolerantJson.decodeFromString<Set<AnnouncementId>>(saved) }
+                .getOrDefault(emptySet())
+
         private val Context.preferencesDataStore by preferencesDataStore(
             name = "live-information",
         )
@@ -75,8 +79,7 @@ class LiveInformationManager@Inject constructor(
         defaultValue = emptySet(),
         parse = { saved ->
             // Corrupt/old stored JSON must not crash settings or data flow subscribers.
-            runCatching { tolerantJson.decodeFromString<Set<AnnouncementId>>(saved) }
-                .getOrDefault(emptySet())
+            parseDismissedAnnouncementIds(saved)
         },
         save = {
             Json.encodeToString(it)
