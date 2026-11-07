@@ -1262,8 +1262,8 @@ public class DeviceProfile {
             maxIconTextLineCount = mResponsiveWorkspaceCellSpec.getIconTextMaxLineCount();
 
             if (cellWidthPx < iconSizePx) {
-                // get a smaller icon size
-                iconSizePx = mIconSizeSteps.getIconSmallerThan(cellWidthPx);
+                // Clamp to the actual column width without jumping to a smaller preset step.
+                iconSizePx = Math.max(1, cellWidthPx);
             }
 
             if (isVerticalLayout) {
@@ -1399,7 +1399,8 @@ public class DeviceProfile {
                     mResponsiveAllAppsCellSpec,
                     mResponsiveAllAppsWidthSpec,
                     mResponsiveAllAppsHeightSpec,
-                    PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getDrawerIconSizeFactor())
+                    PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getDrawerIconSizeFactor()),
+                    allAppsCellHeightMultiplier
             );
             updateAllAppsWithResponsiveMeasures();
         } else {
