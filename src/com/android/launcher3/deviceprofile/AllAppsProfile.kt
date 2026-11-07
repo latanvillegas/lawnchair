@@ -60,10 +60,19 @@ data class AllAppsProfile(
             textHeightPx: Int,
             maxTextLines: Int,
             gutterPx: Int,
+            rowHeightFactor: Float = 1f,
         ): Int {
+            // A responsive grid must honor the user's row-height slider. Never shrink
+            // below the content's height: the drawer can scroll instead of clipping.
+            val safeFactor = if (rowHeightFactor.isFinite()) {
+                rowHeightFactor.coerceIn(0.3f, 1.5f)
+            } else {
+                1f
+            }
+            val desiredHeightPx = max(1, (specHeightPx * safeFactor).roundToInt())
             val requiredHeight = iconSizePx + drawablePaddingPx +
                 textHeightPx * (max(0, maxTextLines) + 2)
-            return max(specHeightPx, requiredHeight) + max(0, gutterPx)
+            return max(desiredHeightPx, requiredHeight) + max(0, gutterPx)
         }
 
         /** Respect the requested scale up to the measured width of one drawer column. */
@@ -196,6 +205,7 @@ data class AllAppsProfile(
             responsiveAllAppsWidthSpec: CalculatedResponsiveSpec,
             responsiveAllAppsHeightSpec: CalculatedResponsiveSpec,
             iconSizeFactor: Float,
+            rowHeightFactor: Float,
         ): AllAppsProfile {
             // Responsive specs are independent of the IDP sizes. Apply the drawer's
             // user factor here, then resize to the measured cell width and height.
@@ -229,6 +239,7 @@ data class AllAppsProfile(
                 textHeightPx,
                 maxAllAppsTextLineCount,
                 allAppsBorderSpacePx.y,
+                rowHeightFactor,
             )
 
             return AllAppsProfile(
