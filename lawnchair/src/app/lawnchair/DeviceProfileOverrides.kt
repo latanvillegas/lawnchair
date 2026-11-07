@@ -121,8 +121,8 @@ class DeviceProfileOverrides @Inject constructor(
             numFolderRows = prefs.folderRows.get(defaultGrid),
             numFolderColumns = prefs2.folderColumns.firstCached(gridOption = defaultGrid),
 
-            iconSizeFactor = prefs2.homeIconSizeFactor.firstCached(),
-            allAppsIconSizeFactor = prefs2.drawerIconSizeFactor.firstCached(),
+            iconSizeFactor = prefs2.homeIconSizeFactor.firstCached().coerceIn(0.5f, 1.5f),
+            allAppsIconSizeFactor = prefs2.drawerIconSizeFactor.firstCached().coerceIn(0.5f, 1.5f),
             allAppsIconTextSizeFactor =
             if (prefs2.showIconLabelsInDrawer.firstCached()) {
                 prefs2.drawerIconLabelSizeFactor.firstCached()
