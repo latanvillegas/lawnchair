@@ -184,65 +184,44 @@ data class AllAppsProfile(
             // user factor here, then resize to the measured cell width and height.
             val safeFactor =
                 if (iconSizeFactor.isFinite()) iconSizeFactor.coerceIn(0.5f, 2.5f) else 1f
-            var allAppsIconSizePx =
-                max(1, (responsiveAllAppsCellSpec.iconSize * safeFactor).roundToInt())
-            var allAppsIconTextSizePx: Float = responsiveAllAppsCellSpec.iconTextSize.toFloat()
-            var allAppsIconDrawablePaddingPx =
+            val allAppsCellWidthPx = max(1, responsiveAllAppsWidthSpec.cellSizePx)
+            // A RecyclerView can scroll vertically: its rows must grow to contain a larger
+            // icon. The previous portrait-only resizeToFitCellHeight shrank every requested
+            // 150–250% icon back to the fixed responsive spec height.
+            val allAppsIconSizePx = min(
+                allAppsCellWidthPx,
+                max(1, (responsiveAllAppsCellSpec.iconSize * safeFactor).roundToInt()),
+            )
+            val allAppsIconTextSizePx = responsiveAllAppsCellSpec.iconTextSize.toFloat()
+            val allAppsIconDrawablePaddingPx = min(
+                max(0, allAppsCellWidthPx - allAppsIconSizePx),
                 getNormalizedIconDrawablePadding(
                     allAppsIconSizePx,
                     responsiveAllAppsCellSpec.iconDrawablePadding,
-                )
-            var maxAllAppsTextLineCount = responsiveAllAppsCellSpec.iconTextMaxLineCount
+                ),
+            )
+            val maxAllAppsTextLineCount = responsiveAllAppsCellSpec.iconTextMaxLineCount
             val allAppsBorderSpacePx =
                 Point(responsiveAllAppsWidthSpec.gutterPx, responsiveAllAppsHeightSpec.gutterPx)
-            var allAppsCellHeightPx = responsiveAllAppsHeightSpec.cellSizePx
-            var allAppsCellWidthPx = responsiveAllAppsWidthSpec.cellSizePx
+            val textHeightPx = Utilities.calculateTextHeight(allAppsIconTextSizePx)
+            // Reserve two additional label-height units for visual breathing space and
+            // TextView font metrics. Preserve the responsive spec minimum where possible.
+            val requestedRowHeightPx = allAppsIconSizePx + allAppsIconDrawablePaddingPx +
+                textHeightPx * (max(0, maxAllAppsTextLineCount) + 2)
+            val rowHeightPx = max(
+                responsiveAllAppsHeightSpec.cellSizePx,
+                requestedRowHeightPx,
+            ) + max(0, allAppsBorderSpacePx.y)
 
-            // Reduce the size of the app icon if it doesn't fit
-            if (allAppsCellWidthPx < allAppsIconSizePx) {
-                // get a smaller icon size
-                allAppsIconSizePx = min(allAppsCellWidthPx, iconSizeSteps.getIconSmallerThan(allAppsCellWidthPx))
-            }
-
-            val cellContentDimensions =
-                CellContentDimensions(
-                    allAppsIconSizePx,
-                    allAppsIconDrawablePaddingPx,
-                    allAppsIconTextSizePx.toInt(),
-                    maxAllAppsTextLineCount,
-                )
-            if (allAppsCellHeightPx < cellContentDimensions.getCellContentHeight()) {
-                if (isVerticalBarLayout) {
-                    if (allAppsCellHeightPx < allAppsIconSizePx) {
-                        cellContentDimensions.iconSizePx =
-                            iconSizeSteps.getIconSmallerThan(allAppsCellHeightPx)
-                    }
-                } else {
-                    cellContentDimensions.resizeToFitCellHeight(allAppsCellHeightPx, iconSizeSteps)
-                }
-                allAppsIconSizePx = cellContentDimensions.iconSizePx
-                allAppsIconDrawablePaddingPx = cellContentDimensions.iconDrawablePaddingPx
-                allAppsIconTextSizePx = cellContentDimensions.iconTextSizePx.toFloat()
-                maxAllAppsTextLineCount = cellContentDimensions.maxLineCount
-            }
-
-            allAppsCellHeightPx += responsiveAllAppsHeightSpec.gutterPx
-
-            val allAppsProfile =
-                AllAppsProfile(
-                    borderSpacePx = allAppsBorderSpacePx,
-                    cellHeightPx = allAppsCellHeightPx,
-                    iconSizePx = allAppsIconSizePx,
-                    iconTextSizePx = allAppsIconTextSizePx,
-                    iconDrawablePaddingPx = allAppsIconDrawablePaddingPx,
-                    maxAllAppsTextLineCount = maxAllAppsTextLineCount,
-                    cellWidthPx = allAppsCellWidthPx,
-                )
-
-            return when {
-                isVerticalBarLayout -> autoResizeAllAppsCells(allAppsProfile)
-                else -> allAppsProfile
-            }
+            return AllAppsProfile(
+                borderSpacePx = allAppsBorderSpacePx,
+                cellHeightPx = rowHeightPx,
+                iconSizePx = allAppsIconSizePx,
+                iconTextSizePx = allAppsIconTextSizePx,
+                iconDrawablePaddingPx = allAppsIconDrawablePaddingPx,
+                maxAllAppsTextLineCount = maxAllAppsTextLineCount,
+                cellWidthPx = allAppsCellWidthPx,
+            )
         }
 
         /** Re-computes the all-apps cell size to be independent of workspace */
