@@ -1121,10 +1121,17 @@ public class BubbleTextView extends TextView implements ItemInfoUpdateReceiver,
         int height = MeasureSpec.getSize(heightMeasureSpec);
         if (mCenterVertically) {
             Paint.FontMetrics fm = getPaint().getFontMetrics();
-            int cellHeightPx = mIconSize + getCompoundDrawablePadding() +
-                    (int) Math.ceil(fm.bottom - fm.top) * getCellSpecMaxTextLineCount();
-            setPadding(getPaddingLeft(), (height - cellHeightPx) / 2, getPaddingRight(),
-                    getPaddingBottom());
+            final int textLineCount = Math.max(0, getCellSpecMaxTextLineCount());
+            final int cellHeightPx = mIconSize + getCompoundDrawablePadding()
+                    + (int) Math.ceil(fm.bottom - fm.top) * textLineCount;
+            // Larger icons can consume the responsive cell's free space. A negative
+            // top padding makes the last glyphs extend beyond the workspace bounds.
+            final int safeTopPadding = Math.max(0,
+                    (height - getPaddingBottom() - cellHeightPx) / 2);
+            if (safeTopPadding != getPaddingTop()) {
+                setPadding(getPaddingLeft(), safeTopPadding,
+                        getPaddingRight(), getPaddingBottom());
+            }
         }
         if (shouldDrawAppContrastTile()) {
             int mAppTitleHorizontalPadding = getResources().getDimensionPixelSize(

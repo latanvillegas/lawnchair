@@ -75,9 +75,9 @@ class DeviceProfileOverrides @Inject constructor(
     )
 
     fun getTextFactors() = TextFactors(preferenceManager2)
-    override fun close() {
-        TODO("Not yet implemented")
-    }
+    // No subscriptions, file handles, or other owned resources are retained here.
+    // Throwing from close() during launcher teardown can crash the app on recreation.
+    override fun close() = Unit
 
     data class DBGridInfo(
         val numHotseatColumns: Int,

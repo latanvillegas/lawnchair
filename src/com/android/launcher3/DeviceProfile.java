@@ -1278,8 +1278,13 @@ public class DeviceProfile {
                     iconDrawablePaddingPx,
                     iconTextSizePx,
                     maxIconTextLineCount);
-            int cellContentHeight = cellContentDimensions.resizeToFitCellHeight(cellHeightPx,
-                    mIconSizeSteps);
+            // TextView renders font descenders slightly below the nominal icon content
+            // height. Keep a small guaranteed margin inside the measured last row.
+            final int labelDescentReservePx =
+                    iconTextSizePx > 0 && maxIconTextLineCount > 0
+                            ? Math.max(2, Math.round(iconTextSizePx * 0.25f)) : 0;
+            int cellContentHeight = cellContentDimensions.resizeToFitCellHeight(
+                    Math.max(1, cellHeightPx - labelDescentReservePx), mIconSizeSteps);
             iconSizePx = cellContentDimensions.getIconSizePx();
             iconDrawablePaddingPx = cellContentDimensions.getIconDrawablePaddingPx();
             iconTextSizePx = cellContentDimensions.getIconTextSizePx();
@@ -1357,14 +1362,18 @@ public class DeviceProfile {
             // cells at 200-250% (especially on small landscape windows).
             final Point availableCell = getCellSize();
             final int labelHeightPx = Utilities.calculateTextHeight(iconTextSizePx);
+            final int labelDescentReservePx = iconTextSizePx > 0
+                    ? Math.max(2, Math.round(iconTextSizePx * 0.25f)) : 0;
             final int maxIconWidthPx = Math.max(1, availableCell.x);
             final int maxIconHeightPx = Math.max(1, (int) Math.floor(
-                    Math.max(1, availableCell.y - labelHeightPx) / ICON_OVERLAP_FACTOR));
+                    Math.max(1, availableCell.y - labelHeightPx - labelDescentReservePx)
+                            / ICON_OVERLAP_FACTOR));
             iconSizePx = Math.min(iconSizePx, Math.min(maxIconWidthPx, maxIconHeightPx));
 
             iconDrawablePaddingPx = (int) (getNormalizedIconDrawablePadding() * iconScale);
             final int freeCellHeightPx = availableCell.y
-                    - getIconSizeWithOverlap(iconSizePx) - labelHeightPx;
+                    - getIconSizeWithOverlap(iconSizePx) - labelHeightPx
+                    - labelDescentReservePx;
             final int freeCellWidthPx = availableCell.x - iconSizePx;
             iconDrawablePaddingPx = Math.max(0, Math.min(iconDrawablePaddingPx,
                     Math.min(freeCellWidthPx, freeCellHeightPx)));
@@ -1390,9 +1399,7 @@ public class DeviceProfile {
                     mResponsiveAllAppsCellSpec,
                     mResponsiveAllAppsWidthSpec,
                     mResponsiveAllAppsHeightSpec,
-                    mIconSizeSteps,
-                    PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getDrawerIconSizeFactor()),
-                    isVerticalBarLayout()
+                    PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getDrawerIconSizeFactor())
             );
             updateAllAppsWithResponsiveMeasures();
         } else {

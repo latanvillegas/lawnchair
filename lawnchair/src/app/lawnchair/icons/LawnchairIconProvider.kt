@@ -156,7 +156,11 @@ class LawnchairIconProvider @Inject constructor(
             val overrideItem = overrideRepo.overridesMap[ComponentKey(componentName, user)]
             if (overrideItem?.packPackageName == ImportedIconStore.PACKAGE_NAME) {
                 try {
-                    val targetPixels = (192f * iconDpi.coerceAtLeast(160) / 160f).toInt()
+                    // Decoding 192dp at xxhdpi allocates ~1.3 MiB per custom icon.
+                    // 144dp covers the supported 250% of the usual 48dp base icon
+                    // with headroom, while capping large-density decodes at 512px.
+                    val targetPixels = (144f * iconDpi.coerceAtLeast(160) / 160f)
+                        .toInt().coerceIn(144, 512)
                     val bitmap = ImportedIconStore.decode(context, overrideItem.drawableName, targetPixels)
                     return BitmapDrawable(context.resources, bitmap)
                 } catch (exception: Exception) {

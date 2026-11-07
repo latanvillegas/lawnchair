@@ -200,7 +200,27 @@ public class ShortcutAndWidgetContainer extends ViewGroup implements FolderIcon.
                     : mContainerType == WORKSPACE
                             ? dp.workspaceCellPaddingXPx
                             : (int) (dp.edgeMarginPx / 2f);
-            child.setPadding(cellPaddingX, cellPaddingY, cellPaddingX, 0);
+            if (mContainerType == WORKSPACE && child instanceof BubbleTextView iconView
+                    && dp.maxIconTextLineCount > 0 && iconView.getTextSize() > 0) {
+                // Reserve the complete font-metrics box and a small descent margin.
+                // At large icon scales the old center padding placed the text baseline
+                // outside the last workspace row (visible as a horizontal cutoff).
+                final int textHeight = Utilities.calculateTextHeight(iconView.getTextSize())
+                        * dp.maxIconTextLineCount;
+                final int descentMargin = Math.max(2,
+                        Math.round(iconView.getTextSize() * 0.25f));
+                final int requiredHeight = iconView.getIconSize()
+                        + iconView.getCompoundDrawablePadding() + textHeight + descentMargin;
+                cellPaddingY = Math.min(cellPaddingY, Math.max(0, lp.height - requiredHeight));
+            }
+            // setPadding triggers an internal layout invalidation on some Android
+            // versions; avoid repeating it on unchanged workspace measurements.
+            if (child.getPaddingLeft() != cellPaddingX
+                    || child.getPaddingTop() != cellPaddingY
+                    || child.getPaddingRight() != cellPaddingX
+                    || child.getPaddingBottom() != 0) {
+                child.setPadding(cellPaddingX, cellPaddingY, cellPaddingX, 0);
+            }
         }
         int childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY);
         int childheightMeasureSpec = MeasureSpec.makeMeasureSpec(lp.height, MeasureSpec.EXACTLY);
