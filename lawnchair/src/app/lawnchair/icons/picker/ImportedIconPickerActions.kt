@@ -91,20 +91,20 @@ fun ImportedIconPickerActions(
                     }
                 }
                 if (disposed.get()) {
-                    unconfirmed.remove(name)
-                    withContext(Dispatchers.IO) {
+                    withContext(kotlinx.coroutines.NonCancellable + Dispatchers.IO) {
                         ImportedIconStore.discardUnconfirmed(context, name)
                     }
+                    unconfirmed.remove(name)
                     return@launch
                 }
                 val previous = pendingIcon
                 pendingIcon = name
                 preview = bitmap.asImageBitmap()
                 if (previous != null && previous != name) {
-                    unconfirmed.remove(previous)
-                    withContext(Dispatchers.IO) {
+                    withContext(kotlinx.coroutines.NonCancellable + Dispatchers.IO) {
                         ImportedIconStore.discardUnconfirmed(context, previous)
                     }
+                    unconfirmed.remove(previous)
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
