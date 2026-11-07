@@ -18,8 +18,10 @@ package app.lawnchair.ui.preferences
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
@@ -134,45 +136,44 @@ private fun PreferenceScreen(
     navHost: @Composable () -> Unit,
 ) {
     val moveableNavHost = remember { movableContentOf { navHost() } }
-    when {
-        useTwoPane -> {
-            TwoPane(
-                first = {
-                    PreferencesDashboard(
-                        currentRoute = currentTopRoute,
-                        onNavigate = {
-                            navController.navigate(it) {
-                                launchSingleTop = true
-                                popUpTo(navController.graph.id)
-                            }
-                            onRouteChange(it)
-                        },
-                    )
-                },
-                second = {
-                    moveableNavHost()
-                },
-                strategy = HorizontalTwoPaneStrategy(splitOffset = 420.dp),
-                displayFeatures = displayFeatures,
-            )
-        }
+    // Window size classes can lag behind a freeform resize or a rotation. Measure
+    // the *actual* content constraints so a fixed two-pane split cannot place the
+    // drawer settings off-screen on portrait, split-screen or floating windows.
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val canFitTwoPanes = useTwoPane && maxWidth >= 840.dp && maxHeight >= 480.dp
+        when {
+            canFitTwoPanes -> {
+                TwoPane(
+                    first = {
+                        PreferencesDashboard(
+                            currentRoute = currentTopRoute,
+                            onNavigate = {
+                                navController.navigate(it) {
+                                    launchSingleTop = true
+                                    popUpTo(navController.graph.id)
+                                }
+                                onRouteChange(it)
+                            },
+                        )
+                    },
+                    second = { moveableNavHost() },
+                    strategy = HorizontalTwoPaneStrategy(splitOffset = 360.dp),
+                    displayFeatures = displayFeatures,
+                )
+            }
 
-        isExpandedScreen -> {
-            Surface(
-                color = MaterialTheme.colorScheme.surface,
-                modifier = Modifier
-                    .fillMaxWidth(),
-            ) {
-                Box(
-                    modifier = Modifier.requiredWidth(640.dp),
+            isExpandedScreen -> {
+                Surface(
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.fillMaxSize(),
                 ) {
-                    moveableNavHost()
+                    Box(modifier = Modifier.fillMaxWidth().widthIn(max = 640.dp)) {
+                        moveableNavHost()
+                    }
                 }
             }
-        }
 
-        else -> {
-            moveableNavHost()
+            else -> moveableNavHost()
         }
     }
 }
