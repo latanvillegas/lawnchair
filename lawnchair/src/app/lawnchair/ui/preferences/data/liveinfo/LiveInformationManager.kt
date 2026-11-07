@@ -23,6 +23,14 @@ class LiveInformationManager@Inject constructor(
 ) : PreferenceManager {
 
     companion object {
+        // Json is immutable and thread-safe; reuse one parser rather than allocating
+        // a new instance every time DataStore deserializes a preference.
+        private val tolerantJson = Json { ignoreUnknownKeys = true }
+
+        internal fun parseDismissedAnnouncementIds(saved: String): Set<AnnouncementId> =
+            runCatching { tolerantJson.decodeFromString<Set<AnnouncementId>>(saved) }
+                .getOrDefault(emptySet())
+
         private val Context.preferencesDataStore by preferencesDataStore(
             name = "live-information",
         )
@@ -55,8 +63,7 @@ class LiveInformationManager@Inject constructor(
         key = stringPreferencesKey(name = "live_information"),
         defaultValue = LiveInformation(),
         parse = { string ->
-            val withUnknownKeys = Json { ignoreUnknownKeys = true }
-            runCatching { withUnknownKeys.decodeFromString<LiveInformation>(string) }
+            runCatching { tolerantJson.decodeFromString<LiveInformation>(string) }
                 .getOrNull() ?: LiveInformation()
         },
         save = { liveInformation ->
@@ -70,9 +77,9 @@ class LiveInformationManager@Inject constructor(
     val dismissedAnnouncementIds = preference(
         key = stringPreferencesKey(name = "dismissed_announcement_ids"),
         defaultValue = emptySet(),
-        parse = {
-            val withUnknownKeys = Json { ignoreUnknownKeys = true }
-            withUnknownKeys.decodeFromString<Set<AnnouncementId>>(it)
+        parse = { saved ->
+            // Corrupt/old stored JSON must not crash settings or data flow subscribers.
+            parseDismissedAnnouncementIds(saved)
         },
         save = {
             Json.encodeToString(it)
