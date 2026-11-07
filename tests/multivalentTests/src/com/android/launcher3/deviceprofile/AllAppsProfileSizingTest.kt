@@ -27,7 +27,7 @@ class AllAppsProfileSizingTest {
     @Test
     fun landscapeAndPortraitUseTheSameColumnWidthBounds() {
         assertThat(AllAppsProfile.fitResponsiveIconSizePx(56, 2.5f, 92)).isEqualTo(92)
-        assertThat(AllAppsProfile.fitResponsiveIconSizePx(56, 2.5f, 92)).isEqualTo(92)
+        assertThat(AllAppsProfile.fitResponsiveIconSizePx(56, 2.5f, 160)).isEqualTo(140)
     }
 
     @Test
