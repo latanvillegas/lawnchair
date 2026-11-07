@@ -74,6 +74,13 @@ object ImportedIconStore {
     }
 
     /**
+     * Only call for an image that the user has NOT confirmed. Keep confirmed
+     * originals because icon overrides reference their filename persistently.
+     */
+    fun discardUnconfirmed(context: Context, name: String): Boolean =
+        runCatching { resolve(context, name).delete() }.getOrDefault(false)
+
+    /**
      * Decodes at the requested display size without rewriting the saved original.
      * Hardware scaling remains the responsibility of the view rendering the bitmap.
      */
