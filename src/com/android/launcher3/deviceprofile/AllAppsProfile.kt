@@ -75,11 +75,42 @@ data class AllAppsProfile(
             return max(desiredHeightPx, requiredHeight) + max(0, gutterPx)
         }
 
-        /** Respect the requested scale up to the measured width of one drawer column. */
-        fun fitResponsiveIconSizePx(baseSizePx: Int, factor: Float, columnWidthPx: Int): Int {
+        /**
+         * Honor the icon-size slider while using the actual grid column pitch.
+         *
+         * Responsive specs can reserve much of a column for a gutter, particularly
+         * in portrait tablet mode. RecyclerView gives each icon a full grid span,
+         * so limiting the image to spec.cellSizePx alone incorrectly caps 250%
+         * icons even when the row has ample horizontal space.
+         *
+         * preferredSizePx is the IDP's already-scaled user setting: do not apply
+         * factor to it a second time. Preserve at least 10% of the grid span for
+         * separation and avoid allocating beyond the measured column width.
+         */
+        fun fitResponsiveIconSizePx(
+            baseSizePx: Int,
+            factor: Float,
+            columnWidthPx: Int,
+            columnGutterPx: Int = 0,
+            preferredSizePx: Int = 0,
+        ): Int {
             val safeFactor = if (factor.isFinite()) factor.coerceIn(0.5f, 2.5f) else 1f
-            return min(max(1, columnWidthPx),
-                max(1, (baseSizePx * safeFactor).roundToInt()))
+            val requested = max(
+                max(1, (baseSizePx * safeFactor).roundToInt()),
+                preferredSizePx.coerceAtLeast(0),
+            )
+            val cellWidth = max(1, columnWidthPx)
+            val gutter = columnGutterPx.coerceAtLeast(0)
+            val spanBudget = cellWidth.toLong() + gutter.toLong()
+            val safeBudget = if (gutter > 0) {
+                min(
+                    Int.MAX_VALUE.toLong(),
+                    max(cellWidth.toLong(), spanBudget * 9L / 10L),
+                ).toInt()
+            } else {
+                cellWidth
+            }
+            return min(requested, safeBudget)
         }
 
         private fun calculateAllAppsBorderSpacePx(
@@ -206,6 +237,7 @@ data class AllAppsProfile(
             responsiveAllAppsHeightSpec: CalculatedResponsiveSpec,
             iconSizeFactor: Float,
             rowHeightFactor: Float,
+            preferredIconSizePx: Int,
         ): AllAppsProfile {
             // Responsive specs are independent of the IDP sizes. Apply the drawer's
             // user factor here, then resize to the measured cell width and height.
@@ -217,10 +249,20 @@ data class AllAppsProfile(
                 responsiveAllAppsCellSpec.iconSize,
                 iconSizeFactor,
                 allAppsCellWidthPx,
+                responsiveAllAppsWidthSpec.gutterPx,
+                preferredIconSizePx,
             )
             val allAppsIconTextSizePx = responsiveAllAppsCellSpec.iconTextSize.toFloat()
+            val availableSpanPx = max(
+                allAppsCellWidthPx,
+                min(
+                    Int.MAX_VALUE.toLong(),
+                    allAppsCellWidthPx.toLong() +
+                        responsiveAllAppsWidthSpec.gutterPx.coerceAtLeast(0).toLong(),
+                ).toInt(),
+            )
             val allAppsIconDrawablePaddingPx = min(
-                max(0, allAppsCellWidthPx - allAppsIconSizePx),
+                max(0, (availableSpanPx - allAppsIconSizePx) / 2),
                 getNormalizedIconDrawablePadding(
                     allAppsIconSizePx,
                     responsiveAllAppsCellSpec.iconDrawablePadding,
