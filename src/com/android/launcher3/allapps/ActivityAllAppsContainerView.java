@@ -111,7 +111,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import app.lawnchair.preferences2.PreferenceCacheExtensionsKt;
 import static com.topjohnwu.superuser.internal.Utils.context;
@@ -1229,11 +1228,23 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
 
     @VisibleForTesting
     public void onAppsUpdated() {
-        Log.d(TAG, "onAppsUpdated; number of apps: " + mAllAppsStore.getApps().length);
-        mHasWorkApps = Stream.of(mAllAppsStore.getApps())
-                .anyMatch(mWorkManager.getItemInfoMatcher());
-        mHasPrivateApps = Stream.of(mAllAppsStore.getApps())
-                .anyMatch(mPrivateProfileManager.getItemInfoMatcher());
+        // Check both profile predicates in one pass without creating Stream objects.
+        // App updates can arrive in bursts during package installation and restore.
+        final Predicate<ItemInfo> workMatcher = mWorkManager.getItemInfoMatcher();
+        final Predicate<ItemInfo> privateMatcher = mPrivateProfileManager.getItemInfoMatcher();
+        mHasWorkApps = false;
+        mHasPrivateApps = false;
+        for (ItemInfo app : mAllAppsStore.getApps()) {
+            if (!mHasWorkApps && workMatcher.test(app)) {
+                mHasWorkApps = true;
+            }
+            if (!mHasPrivateApps && privateMatcher.test(app)) {
+                mHasPrivateApps = true;
+            }
+            if (mHasWorkApps && mHasPrivateApps) {
+                break;
+            }
+        }
         if (!isSearching()) {
             rebindAdapters();
         }
