@@ -168,7 +168,12 @@ public class AllAppsGridAdapter<T extends Context & ActivityContext> extends
          */
         private int getRowsNotForAccessibility(int adapterPosition) {
             List<AdapterItem> items = mApps.getAdapterItems();
-            adapterPosition = Math.max(adapterPosition, items.size() - 1);
+            if (items.isEmpty() || adapterPosition < 0) {
+                return 0;
+            }
+            // Only inspect rows up to the requested adapter position. The old
+            // Math.max always scanned the entire list and misreported item indices.
+            adapterPosition = Math.min(adapterPosition, items.size() - 1);
             int extraRows = 0;
             for (int i = 0; i <= adapterPosition && i < items.size(); i++) {
                 if (!isViewType(items.get(i).viewType, VIEW_TYPE_MASK_ICON)) {
