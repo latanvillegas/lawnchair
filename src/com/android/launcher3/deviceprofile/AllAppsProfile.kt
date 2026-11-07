@@ -28,8 +28,6 @@ import com.android.launcher3.Utilities.pxFromSp
 import com.android.launcher3.responsive.CalculatedCellSpec
 import com.android.launcher3.responsive.CalculatedResponsiveSpec
 import com.android.launcher3.testing.shared.ResourceUtils.pxFromDp
-import com.android.launcher3.util.CellContentDimensions
-import com.android.launcher3.util.IconSizeSteps
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -176,9 +174,7 @@ data class AllAppsProfile(
             responsiveAllAppsCellSpec: CalculatedCellSpec,
             responsiveAllAppsWidthSpec: CalculatedResponsiveSpec,
             responsiveAllAppsHeightSpec: CalculatedResponsiveSpec,
-            iconSizeSteps: IconSizeSteps,
             iconSizeFactor: Float,
-            isVerticalBarLayout: Boolean,
         ): AllAppsProfile {
             // Responsive specs are independent of the IDP sizes. Apply the drawer's
             // user factor here, then resize to the measured cell width and height.
