@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +28,10 @@ import androidx.compose.ui.res.stringResource
 import com.android.launcher3.R
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -48,20 +53,61 @@ fun ImportedIconPickerActions(
     var pendingIcon by remember { mutableStateOf<String?>(null) }
     var preview by remember { mutableStateOf<androidx.compose.ui.graphics.ImageBitmap?>(null) }
 
+    // Copying an original happens before the user accepts it. Track unconfirmed
+    // files across IO cancellation and dispose so leaving the picker won't leak
+    // 32 MiB per abandoned selection into app-private storage.
+    val unconfirmed = remember { ConcurrentHashMap.newKeySet<String>() }
+    val disposed = remember { AtomicBoolean(false) }
+
+    DisposableEffect(context) {
+        onDispose {
+            disposed.set(true)
+            val abandoned = unconfirmed.toList()
+            unconfirmed.clear()
+            if (abandoned.isNotEmpty()) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    abandoned.forEach { ImportedIconStore.discardUnconfirmed(context, it) }
+                }
+            }
+        }
+    }
+
     fun importSelected(uri: Uri?) {
         if (uri == null || importing) return
         importing = true
         error = null
         scope.launch {
             try {
-                val name = withContext(Dispatchers.IO) {
-                    ImportedIconStore.importFromUri(context, uri)
+                val (name, bitmap) = withContext(Dispatchers.IO) {
+                    val importedName = ImportedIconStore.importFromUri(context, uri)
+                    unconfirmed.add(importedName)
+                    try {
+                        if (disposed.get()) throw CancellationException("Icon picker disposed")
+                        importedName to ImportedIconStore.decode(context, importedName, 512)
+                    } catch (failure: Throwable) {
+                        unconfirmed.remove(importedName)
+                        ImportedIconStore.discardUnconfirmed(context, importedName)
+                        throw failure
+                    }
                 }
-                val bitmap = withContext(Dispatchers.IO) {
-                    ImportedIconStore.decode(context, name, 512)
+                if (disposed.get()) {
+                    unconfirmed.remove(name)
+                    withContext(Dispatchers.IO) {
+                        ImportedIconStore.discardUnconfirmed(context, name)
+                    }
+                    return@launch
                 }
+                val previous = pendingIcon
                 pendingIcon = name
                 preview = bitmap.asImageBitmap()
+                if (previous != null && previous != name) {
+                    unconfirmed.remove(previous)
+                    withContext(Dispatchers.IO) {
+                        ImportedIconStore.discardUnconfirmed(context, previous)
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (exception: Exception) {
                 error = exception.localizedMessage ?: "Unable to import icon"
             } finally {
@@ -100,9 +146,18 @@ fun ImportedIconPickerActions(
         }
         if (pendingIcon != null) {
             TextButton(onClick = {
-                pendingIcon?.let(onImport)
-                pendingIcon = null
-                preview = null
+                val selected = pendingIcon
+                if (selected != null) {
+                    try {
+                        // Only the confirmed original becomes a persistent override.
+                        onImport(selected)
+                        unconfirmed.remove(selected)
+                        pendingIcon = null
+                        preview = null
+                    } catch (exception: Exception) {
+                        error = exception.localizedMessage ?: "Unable to assign icon"
+                    }
+                }
             }) { Text(stringResource(id = R.string.icon_import_confirm)) }
         }
         error?.let { Text(it) }
