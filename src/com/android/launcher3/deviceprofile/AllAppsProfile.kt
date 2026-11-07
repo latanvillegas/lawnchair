@@ -52,6 +52,27 @@ data class AllAppsProfile(
 
     companion object Factory {
 
+        /** Responsive drawer rows scroll vertically; grow their height instead of shrinking icons. */
+        fun calculateResponsiveRowHeightPx(
+            specHeightPx: Int,
+            iconSizePx: Int,
+            drawablePaddingPx: Int,
+            textHeightPx: Int,
+            maxTextLines: Int,
+            gutterPx: Int,
+        ): Int {
+            val requiredHeight = iconSizePx + drawablePaddingPx +
+                textHeightPx * (max(0, maxTextLines) + 2)
+            return max(specHeightPx, requiredHeight) + max(0, gutterPx)
+        }
+
+        /** Respect the requested scale up to the measured width of one drawer column. */
+        fun fitResponsiveIconSizePx(baseSizePx: Int, factor: Float, columnWidthPx: Int): Int {
+            val safeFactor = if (factor.isFinite()) factor.coerceIn(0.5f, 2.5f) else 1f
+            return min(max(1, columnWidthPx),
+                max(1, (baseSizePx * safeFactor).roundToInt()))
+        }
+
         private fun calculateAllAppsBorderSpacePx(
             inv: InvariantDeviceProfile,
             metric: DisplayMetrics,
@@ -178,15 +199,14 @@ data class AllAppsProfile(
         ): AllAppsProfile {
             // Responsive specs are independent of the IDP sizes. Apply the drawer's
             // user factor here, then resize to the measured cell width and height.
-            val safeFactor =
-                if (iconSizeFactor.isFinite()) iconSizeFactor.coerceIn(0.5f, 2.5f) else 1f
             val allAppsCellWidthPx = max(1, responsiveAllAppsWidthSpec.cellSizePx)
             // A RecyclerView can scroll vertically: its rows must grow to contain a larger
             // icon. The previous portrait-only resizeToFitCellHeight shrank every requested
             // 150–250% icon back to the fixed responsive spec height.
-            val allAppsIconSizePx = min(
+            val allAppsIconSizePx = fitResponsiveIconSizePx(
+                responsiveAllAppsCellSpec.iconSize,
+                iconSizeFactor,
                 allAppsCellWidthPx,
-                max(1, (responsiveAllAppsCellSpec.iconSize * safeFactor).roundToInt()),
             )
             val allAppsIconTextSizePx = responsiveAllAppsCellSpec.iconTextSize.toFloat()
             val allAppsIconDrawablePaddingPx = min(
@@ -202,12 +222,14 @@ data class AllAppsProfile(
             val textHeightPx = Utilities.calculateTextHeight(allAppsIconTextSizePx)
             // Reserve two additional label-height units for visual breathing space and
             // TextView font metrics. Preserve the responsive spec minimum where possible.
-            val requestedRowHeightPx = allAppsIconSizePx + allAppsIconDrawablePaddingPx +
-                textHeightPx * (max(0, maxAllAppsTextLineCount) + 2)
-            val rowHeightPx = max(
+            val rowHeightPx = calculateResponsiveRowHeightPx(
                 responsiveAllAppsHeightSpec.cellSizePx,
-                requestedRowHeightPx,
-            ) + max(0, allAppsBorderSpacePx.y)
+                allAppsIconSizePx,
+                allAppsIconDrawablePaddingPx,
+                textHeightPx,
+                maxAllAppsTextLineCount,
+                allAppsBorderSpacePx.y,
+            )
 
             return AllAppsProfile(
                 borderSpacePx = allAppsBorderSpacePx,
