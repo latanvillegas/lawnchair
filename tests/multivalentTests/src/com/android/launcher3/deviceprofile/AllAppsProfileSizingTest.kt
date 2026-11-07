@@ -59,6 +59,47 @@ class AllAppsProfileSizingTest {
     }
 
     @Test
+    fun responsiveRowHeightFollowsConfiguredSliderWithoutClipping() {
+        assertThat(
+            AllAppsProfile.calculateResponsiveRowHeightPx(
+                specHeightPx = 160,
+                iconSizePx = 40,
+                drawablePaddingPx = 4,
+                textHeightPx = 10,
+                maxTextLines = 1,
+                gutterPx = 8,
+                rowHeightFactor = 1.5f,
+            ),
+        ).isEqualTo(248)
+        assertThat(
+            AllAppsProfile.calculateResponsiveRowHeightPx(
+                specHeightPx = 160,
+                iconSizePx = 80,
+                drawablePaddingPx = 4,
+                textHeightPx = 16,
+                maxTextLines = 1,
+                gutterPx = 8,
+                rowHeightFactor = 0.3f,
+            ),
+        ).isEqualTo(140)
+    }
+
+    @Test
+    fun corruptRowHeightFactorUsesDefaultSafely() {
+        assertThat(
+            AllAppsProfile.calculateResponsiveRowHeightPx(
+                specHeightPx = 160,
+                iconSizePx = 40,
+                drawablePaddingPx = 4,
+                textHeightPx = 10,
+                maxTextLines = 1,
+                gutterPx = 8,
+                rowHeightFactor = Float.NaN,
+            ),
+        ).isEqualTo(168)
+    }
+
+    @Test
     fun invalidScaleCannotAllocateUnboundedIcons() {
         assertThat(AllAppsProfile.fitResponsiveIconSizePx(56, Float.NaN, 180)).isEqualTo(56)
         assertThat(AllAppsProfile.fitResponsiveIconSizePx(56, Float.POSITIVE_INFINITY, 180))
