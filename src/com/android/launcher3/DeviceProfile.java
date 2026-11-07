@@ -1400,7 +1400,11 @@ public class DeviceProfile {
                     mResponsiveAllAppsWidthSpec,
                     mResponsiveAllAppsHeightSpec,
                     PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getDrawerIconSizeFactor()),
-                    allAppsCellHeightMultiplier
+                    allAppsCellHeightMultiplier,
+                    // IDP values already include the user's 50-250% multiplier.
+                    // Use this as a secondary target when portrait responsive
+                    // specs prescribe a smaller icon than landscape.
+                    Math.max(1, pxFromDp(inv.allAppsIconSize[mTypeIndex], mMetrics))
             );
             updateAllAppsWithResponsiveMeasures();
         } else {
