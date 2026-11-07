@@ -1390,9 +1390,7 @@ public class DeviceProfile {
                     mResponsiveAllAppsCellSpec,
                     mResponsiveAllAppsWidthSpec,
                     mResponsiveAllAppsHeightSpec,
-                    mIconSizeSteps,
-                    PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getDrawerIconSizeFactor()),
-                    isVerticalBarLayout()
+                    PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getDrawerIconSizeFactor())
             );
             updateAllAppsWithResponsiveMeasures();
         } else {
