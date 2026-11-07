@@ -59,6 +59,60 @@ class AllAppsProfileSizingTest {
     }
 
     @Test
+    fun portraitTabletCanUseGutterFor250PercentIcons() {
+        // Portrait: six columns on a narrower screen. The logical cell may be
+        // only 92 px, but a 64 px gutter gives enough grid-span space for 120 px.
+        assertThat(
+            AllAppsProfile.fitResponsiveIconSizePx(
+                baseSizePx = 36,
+                factor = 2.5f,
+                columnWidthPx = 92,
+                columnGutterPx = 64,
+                preferredSizePx = 120,
+            ),
+        ).isEqualTo(120)
+    }
+
+    @Test
+    fun wideTabletKeepsUserSelectedSizeWithoutUnwantedUpscaling() {
+        assertThat(
+            AllAppsProfile.fitResponsiveIconSizePx(
+                baseSizePx = 48,
+                factor = 2.5f,
+                columnWidthPx = 192,
+                columnGutterPx = 64,
+                preferredSizePx = 120,
+            ),
+        ).isEqualTo(120)
+    }
+
+    @Test
+    fun narrowGridRespectsTouchTargetsAndCannotOverlapAdjacentIcons() {
+        assertThat(
+            AllAppsProfile.fitResponsiveIconSizePx(
+                baseSizePx = 60,
+                factor = 2.5f,
+                columnWidthPx = 70,
+                columnGutterPx = 20,
+                preferredSizePx = 150,
+            ),
+        ).isEqualTo(81)
+    }
+
+    @Test
+    fun smallUserIconsStaySmallEvenWithExtraGutterSpace() {
+        assertThat(
+            AllAppsProfile.fitResponsiveIconSizePx(
+                baseSizePx = 48,
+                factor = 0.5f,
+                columnWidthPx = 92,
+                columnGutterPx = 64,
+                preferredSizePx = 24,
+            ),
+        ).isEqualTo(24)
+    }
+
+    @Test
     fun responsiveRowHeightFollowsConfiguredSliderWithoutClipping() {
         assertThat(
             AllAppsProfile.calculateResponsiveRowHeightPx(
