@@ -29,9 +29,9 @@ import com.android.launcher3.responsive.CalculatedCellSpec
 import com.android.launcher3.responsive.CalculatedResponsiveSpec
 import com.android.launcher3.testing.shared.ResourceUtils.pxFromDp
 import com.android.launcher3.util.CellContentDimensions
-import com.android.launcher3.util.IconSizeSteps
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 data class AllAppsProfile(
     val borderSpacePx: Point,
@@ -156,71 +156,79 @@ data class AllAppsProfile(
             )
         }
 
+        /**
+         * Builds a scrollable app-drawer grid from the user's icon and row-height settings.
+         *
+         * Responsive specs are layout defaults; unlike the previous implementation they must
+         * not override the values selected in Settings, including on tablets and in landscape.
+         * Icons may only shrink to the available cell width. Height is expanded when necessary
+         * instead of silently scaling a requested icon down to a smaller size step.
+         */
         fun createAllAppsWithResponsive(
             responsiveAllAppsCellSpec: CalculatedCellSpec,
             responsiveAllAppsWidthSpec: CalculatedResponsiveSpec,
             responsiveAllAppsHeightSpec: CalculatedResponsiveSpec,
-            iconSizeSteps: IconSizeSteps,
             isVerticalBarLayout: Boolean,
+            iconSizeFactor: Float,
+            cellHeightFactor: Float,
         ): AllAppsProfile {
-            var allAppsIconSizePx = responsiveAllAppsCellSpec.iconSize
-            var allAppsIconTextSizePx: Float = responsiveAllAppsCellSpec.iconTextSize.toFloat()
-            var allAppsIconDrawablePaddingPx =
-                getNormalizedIconDrawablePadding(
-                    allAppsIconSizePx,
-                    responsiveAllAppsCellSpec.iconDrawablePadding,
-                )
-            var maxAllAppsTextLineCount = responsiveAllAppsCellSpec.iconTextMaxLineCount
-            val allAppsBorderSpacePx =
-                Point(responsiveAllAppsWidthSpec.gutterPx, responsiveAllAppsHeightSpec.gutterPx)
-            var allAppsCellHeightPx = responsiveAllAppsHeightSpec.cellSizePx
-            var allAppsCellWidthPx = responsiveAllAppsWidthSpec.cellSizePx
+            val iconScale = iconSizeFactor.coerceIn(0.5f, 1.5f)
+            val rowScale = cellHeightFactor.coerceIn(0.3f, 1.5f)
+            var allAppsIconSizePx = max(
+                1,
+                (responsiveAllAppsCellSpec.iconSize * iconScale).roundToInt(),
+            )
+            val allAppsIconTextSizePx = responsiveAllAppsCellSpec.iconTextSize.toFloat()
+            var allAppsIconDrawablePaddingPx = getNormalizedIconDrawablePadding(
+                allAppsIconSizePx,
+                responsiveAllAppsCellSpec.iconDrawablePadding,
+            )
+            val maxAllAppsTextLineCount = responsiveAllAppsCellSpec.iconTextMaxLineCount
+            val allAppsBorderSpacePx = Point(
+                responsiveAllAppsWidthSpec.gutterPx,
+                responsiveAllAppsHeightSpec.gutterPx,
+            )
+            val allAppsCellWidthPx = max(1, responsiveAllAppsWidthSpec.cellSizePx)
 
-            // Reduce the size of the app icon if it doesn't fit
-            if (allAppsCellWidthPx < allAppsIconSizePx) {
-                // get a smaller icon size
-                allAppsIconSizePx = iconSizeSteps.getIconSmallerThan(allAppsCellWidthPx)
-            }
+            // The cell width is a hard limit. Preserve the exact user-selected size
+            // whenever there is space, rather than rounding down to an icon-size step.
+            allAppsIconDrawablePaddingPx = allAppsIconDrawablePaddingPx.coerceIn(
+                0,
+                (allAppsCellWidthPx - 1) / 2,
+            )
+            allAppsIconSizePx = min(
+                allAppsIconSizePx,
+                max(1, allAppsCellWidthPx - 2 * allAppsIconDrawablePaddingPx),
+            )
+            val content = CellContentDimensions(
+                allAppsIconSizePx,
+                allAppsIconDrawablePaddingPx,
+                allAppsIconTextSizePx.toInt(),
+                maxAllAppsTextLineCount,
+            )
+            val desiredHeightPx = max(
+                1,
+                (responsiveAllAppsHeightSpec.cellSizePx * rowScale).roundToInt(),
+            )
+            // The app drawer scrolls: a larger cell is preferable to a clipped icon.
+            val allAppsCellHeightPx = max(desiredHeightPx, content.getCellContentHeight()) +
+                responsiveAllAppsHeightSpec.gutterPx
 
-            val cellContentDimensions =
-                CellContentDimensions(
-                    allAppsIconSizePx,
-                    allAppsIconDrawablePaddingPx,
-                    allAppsIconTextSizePx.toInt(),
-                    maxAllAppsTextLineCount,
-                )
-            if (allAppsCellHeightPx < cellContentDimensions.getCellContentHeight()) {
-                if (isVerticalBarLayout) {
-                    if (allAppsCellHeightPx < allAppsIconSizePx) {
-                        cellContentDimensions.iconSizePx =
-                            iconSizeSteps.getIconSmallerThan(allAppsCellHeightPx)
-                    }
-                } else {
-                    cellContentDimensions.resizeToFitCellHeight(allAppsCellHeightPx, iconSizeSteps)
-                }
-                allAppsIconSizePx = cellContentDimensions.iconSizePx
-                allAppsIconDrawablePaddingPx = cellContentDimensions.iconDrawablePaddingPx
-                allAppsIconTextSizePx = cellContentDimensions.iconTextSizePx.toFloat()
-                maxAllAppsTextLineCount = cellContentDimensions.maxLineCount
-            }
+            val profile = AllAppsProfile(
+                borderSpacePx = allAppsBorderSpacePx,
+                cellHeightPx = allAppsCellHeightPx,
+                iconSizePx = allAppsIconSizePx,
+                iconTextSizePx = allAppsIconTextSizePx,
+                iconDrawablePaddingPx = allAppsIconDrawablePaddingPx,
+                maxAllAppsTextLineCount = maxAllAppsTextLineCount,
+                cellWidthPx = allAppsCellWidthPx,
+            )
 
-            allAppsCellHeightPx += responsiveAllAppsHeightSpec.gutterPx
-
-            val allAppsProfile =
-                AllAppsProfile(
-                    borderSpacePx = allAppsBorderSpacePx,
-                    cellHeightPx = allAppsCellHeightPx,
-                    iconSizePx = allAppsIconSizePx,
-                    iconTextSizePx = allAppsIconTextSizePx,
-                    iconDrawablePaddingPx = allAppsIconDrawablePaddingPx,
-                    maxAllAppsTextLineCount = maxAllAppsTextLineCount,
-                    cellWidthPx = allAppsCellWidthPx,
-                )
-
-            return when {
-                isVerticalBarLayout -> autoResizeAllAppsCells(allAppsProfile)
-                else -> allAppsProfile
-            }
+            if (!isVerticalBarLayout) return profile
+            val verticalProfile = autoResizeAllAppsCells(profile)
+            return verticalProfile.copy(
+                cellHeightPx = max(profile.cellHeightPx, verticalProfile.cellHeightPx),
+            )
         }
 
         /** Re-computes the all-apps cell size to be independent of workspace */
