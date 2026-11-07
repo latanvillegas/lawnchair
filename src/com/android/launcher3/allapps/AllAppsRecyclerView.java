@@ -148,7 +148,12 @@ public class AllAppsRecyclerView extends FastScrollRecyclerView {
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        updatePoolSize();
+        super.onSizeChanged(w, h, oldw, oldh);
+        // Recycling capacity depends on visible rows and the device profile.
+        // Do not churn the shared pool on identical layout dimensions.
+        if (w != oldw || h != oldh) {
+            updatePoolSize();
+        }
     }
 
     public void onSearchResultsChanged() {
