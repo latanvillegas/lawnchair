@@ -20,6 +20,76 @@ import org.junit.runner.RunWith
 class AllAppsProfileSizingTest {
 
     @Test
+    fun portraitReducesColumnsWhen250PercentIconsWouldOtherwiseShrink() {
+        assertThat(
+            AllAppsProfile.fitPortraitDrawerColumns(
+                configuredColumns = 6,
+                availableWidthPx = 960,
+                desiredIconSizePx = 220,
+                iconSizeFactor = 2.5f,
+                minSpacingPx = 12,
+            ),
+        ).isEqualTo(3)
+    }
+
+    @Test
+    fun portraitPreservesSixColumnsWhenLargerIconsAlreadyFit() {
+        assertThat(
+            AllAppsProfile.fitPortraitDrawerColumns(
+                configuredColumns = 6,
+                availableWidthPx = 960,
+                desiredIconSizePx = 112,
+                iconSizeFactor = 2.5f,
+                minSpacingPx = 12,
+            ),
+        ).isEqualTo(6)
+    }
+
+    @Test
+    fun defaultAndSmallIconSizesDoNotOverrideUserColumnCount() {
+        assertThat(
+            AllAppsProfile.fitPortraitDrawerColumns(
+                configuredColumns = 10,
+                availableWidthPx = 360,
+                desiredIconSizePx = 70,
+                iconSizeFactor = 1f,
+                minSpacingPx = 8,
+            ),
+        ).isEqualTo(10)
+        assertThat(
+            AllAppsProfile.fitPortraitDrawerColumns(
+                configuredColumns = 10,
+                availableWidthPx = 360,
+                desiredIconSizePx = 35,
+                iconSizeFactor = 0.5f,
+                minSpacingPx = 8,
+            ),
+        ).isEqualTo(10)
+    }
+
+    @Test
+    fun portraitVeryNarrowWindowNeverProducesZeroColumns() {
+        assertThat(
+            AllAppsProfile.fitPortraitDrawerColumns(
+                configuredColumns = 6,
+                availableWidthPx = 280,
+                desiredIconSizePx = 800,
+                iconSizeFactor = 2.5f,
+                minSpacingPx = 8,
+            ),
+        ).isEqualTo(1)
+        assertThat(
+            AllAppsProfile.fitPortraitDrawerColumns(
+                configuredColumns = 6,
+                availableWidthPx = -1,
+                desiredIconSizePx = 180,
+                iconSizeFactor = 2.5f,
+                minSpacingPx = 8,
+            ),
+        ).isEqualTo(6)
+    }
+
+    @Test
     fun portraitKeepsRequestedLargeIconWhenColumnHasSpace() {
         assertThat(AllAppsProfile.fitResponsiveIconSizePx(56, 2f, 144)).isEqualTo(112)
     }
