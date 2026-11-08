@@ -523,7 +523,23 @@ public class DeviceProfile {
         numHotseatPages = Math.max(1, Math.min(5, PreferenceManager.getInstance(context).getDockPages().get()));
         mHotseatColumnSpan = inv.numColumns;
 
-        numShownAllAppsColumns = displayOptionSpec.numAllAppsColumns;
+        // With 150-250% icons, portrait grids must grow the items rather than
+        // silently shrinking them to preserve the original six/ten columns.
+        // A DeviceProfile is rebuilt for each orientation or grid preference change,
+        // so this only adapts the visible portrait drawer. Landscape remains as-is.
+        final float drawerSizeFactor = PreferenceCacheExtensionsKt
+                .firstCached(preferenceManager2.getDrawerIconSizeFactor());
+        final int configuredAllAppsColumns = displayOptionSpec.numAllAppsColumns;
+        if (!mDeviceProperties.isLandscape() && mIsResponsiveGrid) {
+            numShownAllAppsColumns = AllAppsProfile.Factory.fitPortraitDrawerColumns(
+                    configuredAllAppsColumns,
+                    mDeviceProperties.getAvailableWidthPx(),
+                    Math.max(1, pxFromDp(inv.allAppsIconSize[mTypeIndex], mMetrics)),
+                    drawerSizeFactor,
+                    pxFromDp(8, mMetrics));
+        } else {
+            numShownAllAppsColumns = configuredAllAppsColumns;
+        }
 
         int hotseatBarBottomSpace = pxFromDp(inv.hotseatBarBottomSpace[mTypeIndex], mMetrics);
         int minQsbMargin = res.getDimensionPixelSize(R.dimen.min_qsb_margin);
