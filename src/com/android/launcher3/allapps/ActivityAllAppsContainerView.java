@@ -1392,7 +1392,10 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
             final boolean headerHidden = isAppDrawerSearchBarHidden() && !mUsingTabs;
             if (headerHidden ||
                     !PreferenceCacheExtensionsKt.firstCached(pref2.getShowStatusBar())) {
-                topPadding = Math.max(0, topPadding - insets.top);
+                // Window-inset animations can report zero for a hidden system bar,
+                // while the cached DeviceProfile still reserves its original height.
+                final int reservedStatusInset = Math.max(insets.top, grid.getInsets().top);
+                topPadding = Math.max(0, topPadding - Math.max(0, reservedStatusInset));
             }
 
             // The floating search affordance must not reserve space while hidden.
