@@ -126,7 +126,7 @@ class PreferenceManager @Inject constructor(
     val overrideWindowCornerRadius = BoolPref("pref_overrideWindowCornerRadius", false, recreate)
     val windowCornerRadius = IntPref("pref_windowCornerRadius", 80, recreate)
     val autoLaunchRoot = BoolPref("pref_autoLaunchRoot", false)
-    val wallpaperScrolling = BoolPref("pref_wallpaperScrolling", true)
+    val wallpaperScrolling = BoolPref("pref_wallpaperScrolling", false)
     val infiniteScrolling = BoolPref("pref_infiniteScrolling", false)
     val enableDebugMenu = BoolPref("pref_enableDebugMenu", false)
     val vibrationFeedbackLevel: IntPref = IntPref(

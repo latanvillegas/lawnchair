@@ -172,7 +172,8 @@ public class Hotseat extends FrameLayout implements Insettable {
         mIconsContainer.addView(mPageIndicator);
         mPagedView.setPageIndicator(mPageIndicator);
 
-        if (Flags.enableQsbOnHotseat()) {
+        // The QSB feature flag must not override the user's disabled or Google mode.
+        if (Flags.enableQsbOnHotseat() && hotseatMode == LawnchairHotseat.INSTANCE) {
             mQsb = LayoutInflater.from(context).inflate(R.layout.qsb_container_hotseat, this,
                     false);
         } else {

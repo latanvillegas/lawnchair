@@ -523,7 +523,19 @@ public class DeviceProfile {
         numHotseatPages = Math.max(1, Math.min(5, PreferenceManager.getInstance(context).getDockPages().get()));
         mHotseatColumnSpan = inv.numColumns;
 
-        numShownAllAppsColumns = displayOptionSpec.numAllAppsColumns;
+        // This value drives RecyclerView's spans. For 250%-sized portrait
+        // icons, use as many columns as will physically fit the chosen size.
+        // Keep the persisted grid preference and the landscape path unchanged.
+        final float requestedDrawerIconFactor = PreferenceCacheExtensionsKt
+                .firstCached(preferenceManager2.getDrawerIconSizeFactor());
+        numShownAllAppsColumns = mDeviceProperties.isLandscape()
+                ? displayOptionSpec.numAllAppsColumns
+                : AllAppsProfile.Factory.portraitColumnsForIcon(
+                        displayOptionSpec.numAllAppsColumns,
+                        mDeviceProperties.getAvailableWidthPx(),
+                        Math.max(1, pxFromDp(inv.allAppsIconSize[mTypeIndex], mMetrics)),
+                        requestedDrawerIconFactor,
+                        pxFromDp(8, mMetrics));
 
         int hotseatBarBottomSpace = pxFromDp(inv.hotseatBarBottomSpace[mTypeIndex], mMetrics);
         int minQsbMargin = res.getDimensionPixelSize(R.dimen.min_qsb_margin);
@@ -891,6 +903,23 @@ public class DeviceProfile {
 
             workspaceTopPadding = Math.round(paddingWorkspaceTop * cellScaleToFit);
             workspaceBottomPadding = Math.round(paddingWorkspaceBottom * cellScaleToFit);
+        }
+
+        // The tablet padding XML distributes spare height above the first row and
+        // below the last row even when the status bar/Smartspace and dock are off.
+        // Those regions serve no purpose in an opt-in, minimal home screen.
+        // Collapse the reserved areas only in portrait; keep manually enabled
+        // components and all landscape dimensions unchanged.
+        if (!mDeviceProperties.isLandscape()) {
+            if (!PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getShowStatusBar())
+                    && !PreferenceCacheExtensionsKt.firstCached(
+                            preferenceManager2.getEnableSmartspace())) {
+                workspaceTopPadding = 0;
+            }
+            if (!PreferenceCacheExtensionsKt.firstCached(
+                    preferenceManager2.isHotseatEnabled())) {
+                workspaceBottomPadding = 0;
+            }
         }
     }
 
@@ -1415,7 +1444,9 @@ public class DeviceProfile {
                     iconSizePx,
                     mIconDrawablePaddingOriginalPx,
                     allAppsCellHeightMultiplier,
-                    mDeviceProperties.getAvailableWidthPx()
+                    mDeviceProperties.getAvailableWidthPx(),
+                    numShownAllAppsColumns,
+                    !mDeviceProperties.isLandscape()
             );
         }
         updateAllAppsContainerWidth();
@@ -1812,6 +1843,23 @@ public class DeviceProfile {
                         workspacePageIndicatorHeight - mWorkspacePageIndicatorOverlapWorkspace;
             }
             int paddingTop = workspaceTopPadding + (mIsScalableGrid ? 0 : edgeMarginPx);
+            // The disabled status bar + disabled Smartspace combination does
+            // not need the generic grid edge margin above the first icon row.
+            if (!mDeviceProperties.isLandscape()
+                    && !PreferenceCacheExtensionsKt.firstCached(
+                            preferenceManager2.getShowStatusBar())
+                    && !PreferenceCacheExtensionsKt.firstCached(
+                            preferenceManager2.getEnableSmartspace())) {
+                paddingTop = 0;
+            }
+            if (!mDeviceProperties.isLandscape()
+                    && !PreferenceCacheExtensionsKt.firstCached(
+                            preferenceManager2.isHotseatEnabled())) {
+                // No dock means no QSB/dock/pagination reservation below the grid.
+                // Device/system insets are still enforced by the DragLayer.
+                paddingBottom = 0;
+            }
+            paddingBottom = Math.max(0, paddingBottom);
             int paddingLeft = desiredWorkspaceHorizontalMarginPx;
             int paddingRight = desiredWorkspaceHorizontalMarginPx;
 
