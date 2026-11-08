@@ -266,7 +266,7 @@ class PreferenceManager2 @Inject constructor(
 
     val workProfileTabContainerBackground = preference(
         key = booleanPreferencesKey(name = "work_profile_tab_container_background"),
-        defaultValue = true,
+        defaultValue = false,
         onSet = { reloadHelper.recreate() },
     )
 
@@ -404,7 +404,7 @@ class PreferenceManager2 @Inject constructor(
 
     val enableGlobalPrediction = preference(
         key = booleanPreferencesKey(name = "enable_global_prediction"),
-        defaultValue = true,
+        defaultValue = false,
     )
 
     val predictionMode = preference(
@@ -818,7 +818,7 @@ class PreferenceManager2 @Inject constructor(
 
     val wallpaperDepthEffect = preference(
         key = booleanPreferencesKey(name = "enable_wallpaper_depth_effect"),
-        defaultValue = true,
+        defaultValue = false,
         onSet = { reloadHelper.recreate() },
     )
 
