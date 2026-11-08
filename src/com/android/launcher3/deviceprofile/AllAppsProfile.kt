@@ -88,7 +88,7 @@ data class AllAppsProfile(
                 2L * edgeInsetPx.coerceAtLeast(0)).coerceAtLeast(1)
             // Keep a small gap (up to 8 px) without sacrificing icon size.
             val gap = min(8, max(0, iconSizePx / 16))
-            return min(columns, max(1, (usable / (iconSizePx.toLong() + gap)).toInt()))
+            return min(columns, max(1, ((usable + gap) / (iconSizePx.toLong() + gap)).toInt()))
         }
 
         /**
@@ -178,7 +178,11 @@ data class AllAppsProfile(
                     visibleColumns,
                     pxFromDp(8f, metric),
                 )
-                allAppsCellWidthPx = max(allAppsCellWidthPx, allAppsIconSizePx)
+                allAppsCellWidthPx = min(
+                    max(allAppsCellWidthPx, allAppsIconSizePx),
+                    portraitColumnWidthBudget(
+                        availableWidthPx, visibleColumns, pxFromDp(8f, metric)),
+                )
                 val columns = visibleColumns.coerceAtLeast(1)
                 val freeWidth = (availableWidthPx.toLong() - columns.toLong() *
                     allAppsCellWidthPx.toLong()).coerceAtLeast(0L)
@@ -253,10 +257,18 @@ data class AllAppsProfile(
             val requestedIconPx = max(1, pxFromDp(inv.allAppsIconSize[typeIndex], metric, scale))
             // In portrait, favor the requested icon over decorative padding.
             // The old code always reserved the padding first, capping icon growth.
-            val allAppsIconDrawablePaddingPx = min(
-                max(0, res.getDimensionPixelSize(R.dimen.all_apps_icon_drawable_padding)),
-                max(0, (columnWidthBudget - requestedIconPx) / 2),
-            )
+            val allAppsIconDrawablePaddingPx = if (portrait) {
+                min(
+                    max(0, res.getDimensionPixelSize(R.dimen.all_apps_icon_drawable_padding)),
+                    max(0, (columnWidthBudget - requestedIconPx) / 2),
+                )
+            } else {
+                // Keep the original landscape padding calculation.
+                min(
+                    max(0, res.getDimensionPixelSize(R.dimen.all_apps_icon_drawable_padding)),
+                    max(0, (columnWidthBudget - 1) / 2),
+                )
+            }
             val iconWidthBudget = max(1, columnWidthBudget - 2 * allAppsIconDrawablePaddingPx)
             val allAppsIconSizePx = min(requestedIconPx, iconWidthBudget)
             val textSizePx = pxFromSp(inv.allAppsIconTextSize[typeIndex], metric) * scale
