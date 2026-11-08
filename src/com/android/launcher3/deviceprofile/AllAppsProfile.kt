@@ -76,6 +76,35 @@ data class AllAppsProfile(
         }
 
         /**
+         * In portrait, a large icon must not be made tiny merely to preserve the
+         * drawer's preferred number of columns. The user-defined column count is
+         * an upper bound: reduce visible columns only when the configured icon
+         * would otherwise be constrained by the measured screen width.
+         *
+         * Landscape keeps its independent column count and profile untouched.
+         * An 8% horizontal reserve leaves room for the drawer's edge insets.
+         */
+        fun fitPortraitDrawerColumns(
+            configuredColumns: Int,
+            availableWidthPx: Int,
+            desiredIconSizePx: Int,
+            iconSizeFactor: Float,
+            minSpacingPx: Int,
+        ): Int {
+            val columns = configuredColumns.coerceAtLeast(1)
+            if (!iconSizeFactor.isFinite() || iconSizeFactor <= 1f ||
+                availableWidthPx <= 0 || desiredIconSizePx <= 0
+            ) {
+                return columns
+            }
+            val usableWidthPx = max(1, (availableWidthPx.toLong() * 92L / 100L).toInt())
+            val spacingPx = max(minSpacingPx, (desiredIconSizePx.toLong() / 10L).toInt())
+                .coerceAtLeast(0)
+            val requiredPitchPx = desiredIconSizePx.toLong() + spacingPx.toLong()
+            return min(columns, max(1, (usableWidthPx.toLong() / requiredPitchPx).toInt()))
+        }
+
+        /**
          * Honor the icon-size slider while using the actual grid column pitch.
          *
          * Responsive specs can reserve much of a column for a gutter, particularly
