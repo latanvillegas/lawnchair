@@ -1386,14 +1386,18 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
 
         if (!grid.isVerticalBarLayout() || FeatureFlags.enableResponsiveWorkspace()) {
             int topPadding = grid.allAppsPadding.top;
-
-            // Lawnchair: When the status bar is hidden, All Apps should use that space too.
-            // Keep All Apps' own top padding intact and only remove the system status-bar inset.
-            if (!PreferenceCacheExtensionsKt.firstCached(pref2.getShowStatusBar())) {
+            // When the drawer search bar and work tabs are hidden, there is no
+            // header to protect. Remove the unused status-bar reservation only:
+            // do not change the user's separate row-height or top-padding sliders.
+            final boolean headerHidden = isAppDrawerSearchBarHidden() && !mUsingTabs;
+            if (headerHidden ||
+                    !PreferenceCacheExtensionsKt.firstCached(pref2.getShowStatusBar())) {
                 topPadding = Math.max(0, topPadding - insets.top);
             }
 
-            if (isSearchBarFloating() && !grid.shouldShowAllAppsOnSheet()) {
+            // The floating search affordance must not reserve space while hidden.
+            if (!headerHidden && !isAppDrawerSearchBarHidden()
+                    && isSearchBarFloating() && !grid.shouldShowAllAppsOnSheet()) {
                 topPadding += getResources().getDimensionPixelSize(
                         R.dimen.all_apps_additional_top_padding_floating_search);
             }
@@ -1876,7 +1880,7 @@ public class ActivityAllAppsContainerView<T extends Context & ActivityContext>
                         bottomOffset = mPrivateSpaceBottomExtraSpace;
                     }
                 }
-                if (isSearchBarFloating()) {
+                if (isSearchBarFloating() && !isAppDrawerSearchBarHidden()) {
                     bottomOffset += mSearchContainer.getHeight();
                 }
                 mRecyclerView.setPadding(mPadding.left, mPadding.top, mPadding.right,
