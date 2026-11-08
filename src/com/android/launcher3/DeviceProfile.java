@@ -523,23 +523,20 @@ public class DeviceProfile {
         numHotseatPages = Math.max(1, Math.min(5, PreferenceManager.getInstance(context).getDockPages().get()));
         mHotseatColumnSpan = inv.numColumns;
 
-        // With 150-250% icons, portrait grids must grow the items rather than
-        // silently shrinking them to preserve the original six/ten columns.
-        // A DeviceProfile is rebuilt for each orientation or grid preference change,
-        // so this only adapts the visible portrait drawer. Landscape remains as-is.
-        final float drawerSizeFactor = PreferenceCacheExtensionsKt
+        // Preserve the configured grid. Only the visible portrait column count
+        // is reduced if 250% icons would exceed the actual viewport width.
+        // Landscape keeps the existing layout and size computations unchanged.
+        final float requestedDrawerScale = PreferenceCacheExtensionsKt
                 .firstCached(preferenceManager2.getDrawerIconSizeFactor());
-        final int configuredAllAppsColumns = displayOptionSpec.numAllAppsColumns;
-        if (!mDeviceProperties.isLandscape() && mIsResponsiveGrid) {
-            numShownAllAppsColumns = AllAppsProfile.Factory.fitPortraitDrawerColumns(
-                    configuredAllAppsColumns,
-                    mDeviceProperties.getAvailableWidthPx(),
-                    Math.max(1, pxFromDp(inv.allAppsIconSize[mTypeIndex], mMetrics)),
-                    drawerSizeFactor,
-                    pxFromDp(8, mMetrics));
-        } else {
-            numShownAllAppsColumns = configuredAllAppsColumns;
-        }
+        numShownAllAppsColumns = !mDeviceProperties.isLandscape()
+                && (mIsScalableGrid || mIsResponsiveGrid)
+                ? AllAppsProfile.Factory.fitPortraitDrawerColumns(
+                        displayOptionSpec.numAllAppsColumns,
+                        mDeviceProperties.getAvailableWidthPx(),
+                        Math.max(1, pxFromDp(inv.allAppsIconSize[mTypeIndex], mMetrics)),
+                        requestedDrawerScale,
+                        pxFromDp(8, mMetrics))
+                : displayOptionSpec.numAllAppsColumns;
 
         int hotseatBarBottomSpace = pxFromDp(inv.hotseatBarBottomSpace[mTypeIndex], mMetrics);
         int minQsbMargin = res.getDimensionPixelSize(R.dimen.min_qsb_margin);
@@ -1278,8 +1275,8 @@ public class DeviceProfile {
             maxIconTextLineCount = mResponsiveWorkspaceCellSpec.getIconTextMaxLineCount();
 
             if (cellWidthPx < iconSizePx) {
-                // Clamp to the actual column width without jumping to a smaller preset step.
-                iconSizePx = Math.max(1, cellWidthPx);
+                // get a smaller icon size
+                iconSizePx = mIconSizeSteps.getIconSmallerThan(cellWidthPx);
             }
 
             if (isVerticalLayout) {
@@ -1415,12 +1412,7 @@ public class DeviceProfile {
                     mResponsiveAllAppsCellSpec,
                     mResponsiveAllAppsWidthSpec,
                     mResponsiveAllAppsHeightSpec,
-                    PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getDrawerIconSizeFactor()),
-                    allAppsCellHeightMultiplier,
-                    // IDP values already include the user's 50-250% multiplier.
-                    // Use this as a secondary target when portrait responsive
-                    // specs prescribe a smaller icon than landscape.
-                    Math.max(1, pxFromDp(inv.allAppsIconSize[mTypeIndex], mMetrics))
+                    PreferenceCacheExtensionsKt.firstCached(preferenceManager2.getDrawerIconSizeFactor())
             );
             updateAllAppsWithResponsiveMeasures();
         } else {
@@ -1436,7 +1428,9 @@ public class DeviceProfile {
                     iconSizePx,
                     mIconDrawablePaddingOriginalPx,
                     allAppsCellHeightMultiplier,
-                    mDeviceProperties.getAvailableWidthPx()
+                    mDeviceProperties.getAvailableWidthPx(),
+                    numShownAllAppsColumns,
+                    !mDeviceProperties.isLandscape()
             );
         }
         updateAllAppsContainerWidth();
