@@ -523,20 +523,19 @@ public class DeviceProfile {
         numHotseatPages = Math.max(1, Math.min(5, PreferenceManager.getInstance(context).getDockPages().get()));
         mHotseatColumnSpan = inv.numColumns;
 
-        // Preserve the configured grid. Only the visible portrait column count
-        // is reduced if 250% icons would exceed the actual viewport width.
-        // Landscape keeps the existing layout and size computations unchanged.
-        final float requestedDrawerScale = PreferenceCacheExtensionsKt
+        // This value drives RecyclerView's spans. For 250%-sized portrait
+        // icons, use as many columns as will physically fit the chosen size.
+        // Keep the persisted grid preference and the landscape path unchanged.
+        final float requestedDrawerIconFactor = PreferenceCacheExtensionsKt
                 .firstCached(preferenceManager2.getDrawerIconSizeFactor());
-        numShownAllAppsColumns = !mDeviceProperties.isLandscape()
-                && (mIsScalableGrid || mIsResponsiveGrid)
-                ? AllAppsProfile.Factory.fitPortraitDrawerColumns(
+        numShownAllAppsColumns = mDeviceProperties.isLandscape()
+                ? displayOptionSpec.numAllAppsColumns
+                : AllAppsProfile.Factory.portraitColumnsForIcon(
                         displayOptionSpec.numAllAppsColumns,
                         mDeviceProperties.getAvailableWidthPx(),
                         Math.max(1, pxFromDp(inv.allAppsIconSize[mTypeIndex], mMetrics)),
-                        requestedDrawerScale,
-                        pxFromDp(8, mMetrics))
-                : displayOptionSpec.numAllAppsColumns;
+                        requestedDrawerIconFactor,
+                        pxFromDp(8, mMetrics));
 
         int hotseatBarBottomSpace = pxFromDp(inv.hotseatBarBottomSpace[mTypeIndex], mMetrics);
         int minQsbMargin = res.getDimensionPixelSize(R.dimen.min_qsb_margin);
