@@ -52,69 +52,59 @@ data class AllAppsProfile(
 
     companion object Factory {
 
-        /** Portrait icon scaling uses visible columns; stored grid settings are unchanged. */
-        data class PortraitIconFit(
-            val iconSizePx: Int,
-            val cellWidthPx: Int,
-            val borderSpacePx: Int,
-        )
-
         /**
-         * Expands scalable-grid cells (96dp in the stock tablet portrait profile)
-         * to fit the icon size the user selected, up to the actual viewport width.
-         * Only portrait uses this path; landscape keeps its original measurements.
+         * The maximum physical width of one visible All Apps grid column.
+         * This uses the effective columns, not the stored grid column count:
+         * the latter may be reduced in portrait when the user requests 250%.
          */
-        fun fitScalablePortraitIcon(
-            requestedIconSizePx: Int,
-            baseCellWidthPx: Int,
-            defaultBorderPx: Int,
+        fun portraitColumnWidthBudget(
             availableWidthPx: Int,
             visibleColumns: Int,
             edgeInsetPx: Int,
-        ): PortraitIconFit {
+        ): Int {
             val columns = visibleColumns.coerceAtLeast(1)
-            val edge = edgeInsetPx.coerceAtLeast(0)
-                .coerceAtMost(max(0, availableWidthPx / 8))
-            val usableWidth = max(1, availableWidthPx - 2 * edge)
-            val requested = requestedIconSizePx.coerceAtLeast(1)
-            val baseWidth = baseCellWidthPx.coerceAtLeast(1)
-            val borders = columns - 1
-
-            // Reduce gaps before shrinking an icon, but never overlap adjacent cells.
-            val remainingForGaps = usableWidth.toLong() - requested.toLong() * columns
-            val border = if (borders > 0) {
-                min(defaultBorderPx.coerceAtLeast(0),
-                    max(0L, remainingForGaps / borders).toInt())
-            } else {
-                0
-            }
-            val width = max(1, ((usableWidth.toLong() - border.toLong() * borders) /
-                columns).toInt())
-            val cell = min(max(baseWidth, requested), width)
-            return PortraitIconFit(min(requested, cell), cell, border)
+            val insets = edgeInsetPx.coerceAtLeast(0)
+            return max(1, ((availableWidthPx.toLong() - 2L * insets)
+                .coerceAtLeast(1L) / columns).toInt())
         }
 
         /**
-         * 250% icons cannot physically fit in the user's normal six-column tablet
-         * grid at all window widths. Reduce only the effective portrait column count
-         * when necessary, without changing the persisted column preference.
+         * Return a visible column count that can display the requested size.
+         * This is a runtime layout value, never written to the user's setting.
+         * Portrait only; DeviceProfile deliberately skips it in landscape.
          */
-        fun fitPortraitDrawerColumns(
+        fun portraitColumnsForIcon(
             configuredColumns: Int,
             availableWidthPx: Int,
-            desiredIconSizePx: Int,
-            iconSizeFactor: Float,
-            minSpacingPx: Int,
+            iconSizePx: Int,
+            scaleFactor: Float,
+            edgeInsetPx: Int,
         ): Int {
             val columns = configuredColumns.coerceAtLeast(1)
-            if (!iconSizeFactor.isFinite() || iconSizeFactor <= 1f ||
-                availableWidthPx <= 0 || desiredIconSizePx <= 0
+            if (!scaleFactor.isFinite() || scaleFactor <= 1f ||
+                availableWidthPx <= 0 || iconSizePx <= 0
             ) return columns
+            val usable = (availableWidthPx.toLong() -
+                2L * edgeInsetPx.coerceAtLeast(0)).coerceAtLeast(1)
+            // Keep a small gap (up to 8 px) without sacrificing icon size.
+            val gap = min(8, max(0, iconSizePx / 16))
+            return min(columns, max(1, (usable / (iconSizePx.toLong() + gap)).toInt()))
+        }
 
-            val usableWidth = max(1L, availableWidthPx.toLong() * 94L / 100L)
-            val pitch = desiredIconSizePx.toLong() +
-                max(minSpacingPx.coerceAtLeast(0), desiredIconSizePx / 12).toLong()
-            return min(columns, max(1L, usableWidth / max(1L, pitch)).toInt())
+        /**
+         * Expand a portrait tablet's 96dp XML cell to the requested icon size,
+         * subject to the physical width available per visible column.
+         * At 60dp base, 150%=90dp and 250%=150dp.
+         */
+        fun fitPortraitScalableIcon(
+            requestedSizePx: Int,
+            baseCellWidthPx: Int,
+            availableWidthPx: Int,
+            visibleColumns: Int,
+            edgeInsetPx: Int,
+        ): Int {
+            val limit = portraitColumnWidthBudget(availableWidthPx, visibleColumns, edgeInsetPx)
+            return min(max(1, requestedSizePx), max(1, limit))
         }
 
 
@@ -160,7 +150,7 @@ data class AllAppsProfile(
             cellHeightMultiplier: Float = 1f,
             availableWidthPx: Int,
             visibleColumns: Int,
-            isPortrait: Boolean,
+            portrait: Boolean,
         ): AllAppsProfile {
             val allAppsBorderSpacePx = calculateAllAppsBorderSpacePx(inv, metric, typeIndex, scale)
             var allAppsCellHeightPx =
@@ -176,20 +166,32 @@ data class AllAppsProfile(
                 )
             var allAppsCellWidthPx = pxFromDp(inv.allAppsCellSize[typeIndex].x, metric, scale)
 
-            if (isPortrait && allAppsIconSizePx > allAppsCellWidthPx) {
-                val size = fitScalablePortraitIcon(
-                    requestedIconSizePx = allAppsIconSizePx,
-                    baseCellWidthPx = allAppsCellWidthPx,
-                    defaultBorderPx = allAppsBorderSpacePx.x,
-                    availableWidthPx = availableWidthPx,
-                    visibleColumns = visibleColumns,
-                    edgeInsetPx = pxFromDp(8f, metric),
+            if (portrait) {
+                // An XML cell width is a baseline, not a cap on 250% icons.
+                // Stretch each cell into available grid span without altering
+                // the row-height slider or the stored user column count.
+                val requested = allAppsIconSizePx.coerceAtLeast(1)
+                allAppsIconSizePx = fitPortraitScalableIcon(
+                    requested,
+                    allAppsCellWidthPx,
+                    availableWidthPx,
+                    visibleColumns,
+                    pxFromDp(8f, metric),
                 )
-                allAppsIconSizePx = size.iconSizePx
-                allAppsCellWidthPx = size.cellWidthPx
-                allAppsBorderSpacePx.x = size.borderSpacePx
-                allAppsIconDrawablePaddingPx = min(allAppsIconDrawablePaddingPx,
-                    max(0, (allAppsCellWidthPx - allAppsIconSizePx) / 2))
+                allAppsCellWidthPx = max(allAppsCellWidthPx, allAppsIconSizePx)
+                val columns = visibleColumns.coerceAtLeast(1)
+                val freeWidth = (availableWidthPx.toLong() - columns.toLong() *
+                    allAppsCellWidthPx.toLong()).coerceAtLeast(0L)
+                allAppsBorderSpacePx.x = if (columns > 1) {
+                    min(allAppsBorderSpacePx.x.coerceAtLeast(0),
+                        (freeWidth / (columns - 1)).toInt())
+                } else {
+                    0
+                }
+                allAppsIconDrawablePaddingPx = min(
+                    allAppsIconDrawablePaddingPx,
+                    max(0, (allAppsCellWidthPx - allAppsIconSizePx) / 2),
+                )
             } else if (allAppsCellWidthPx < allAppsIconSizePx) {
                 // If allAppsCellWidth no longer fit allAppsIconSize, reduce allAppsBorderSpace to
                 // make allAppsCellWidth bigger.
@@ -239,21 +241,24 @@ data class AllAppsProfile(
             scale: Float,
             cellHeightMultiplier: Float = 1f,
             availableWidthPx: Int,
+            visibleColumns: Int,
+            portrait: Boolean,
         ): AllAppsProfile {
             val allAppsBorderSpacePx = calculateAllAppsBorderSpacePx(inv, metric, typeIndex, scale)
             // The number of columns can be set as high as ten even on narrow phones.
             // Bound icon padding as well as the bitmap so every row fits its real width.
-            val columnWidthBudget = max(1, availableWidthPx / max(1, inv.numAllAppsColumns))
+            val columns = if (portrait) visibleColumns.coerceAtLeast(1)
+                else inv.numAllAppsColumns.coerceAtLeast(1)
+            val columnWidthBudget = max(1, availableWidthPx / columns)
+            val requestedIconPx = max(1, pxFromDp(inv.allAppsIconSize[typeIndex], metric, scale))
+            // In portrait, favor the requested icon over decorative padding.
+            // The old code always reserved the padding first, capping icon growth.
             val allAppsIconDrawablePaddingPx = min(
                 max(0, res.getDimensionPixelSize(R.dimen.all_apps_icon_drawable_padding)),
-                max(0, (columnWidthBudget - 1) / 2),
+                max(0, (columnWidthBudget - requestedIconPx) / 2),
             )
-            // In non-scalable grids the drawer scrolls vertically, so rows may expand.
             val iconWidthBudget = max(1, columnWidthBudget - 2 * allAppsIconDrawablePaddingPx)
-            val allAppsIconSizePx = min(
-                max(1, pxFromDp(inv.allAppsIconSize[typeIndex], metric, scale)),
-                iconWidthBudget,
-            )
+            val allAppsIconSizePx = min(requestedIconPx, iconWidthBudget)
             val textSizePx = pxFromSp(inv.allAppsIconTextSize[typeIndex], metric) * scale
             return AllAppsProfile(
                 borderSpacePx = allAppsBorderSpacePx,
@@ -351,7 +356,7 @@ data class AllAppsProfile(
             cellHeightMultiplier: Float = 1f,
             availableWidthPx: Int,
             visibleColumns: Int,
-            isPortrait: Boolean,
+            portrait: Boolean,
         ) =
             when {
                 isScalableGrid -> {
@@ -365,7 +370,7 @@ data class AllAppsProfile(
                         cellHeightMultiplier = cellHeightMultiplier,
                         availableWidthPx = availableWidthPx,
                         visibleColumns = visibleColumns,
-                        isPortrait = isPortrait,
+                        portrait = portrait,
                     )
                 }
 
@@ -374,6 +379,8 @@ data class AllAppsProfile(
                         res, inv, metric, typeIndex, scale,
                         cellHeightMultiplier = cellHeightMultiplier,
                         availableWidthPx = availableWidthPx,
+                        visibleColumns = visibleColumns,
+                        portrait = portrait,
                     )
                 }
             }
